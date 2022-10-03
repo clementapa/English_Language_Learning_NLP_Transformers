@@ -14,9 +14,10 @@ class MultiRegression(pl.LightningModule):
         self.model = Model(config.name_model)
         
         # freeze backbone for fine tuned
-        for name, param in self.model.named_parameters():
-            if 'cls_list' not in name: # classifier layers
-                param.requires_grad = False
+        if config.freeze_backbone:
+            for name, param in self.model.named_parameters():
+                if 'cls_list' not in name: # classifier layers
+                    param.requires_grad = False
         
         self.labels = ['cohesion', 'syntax', 'vocabulary', 'phraseology', 'grammar', 'conventions']
         

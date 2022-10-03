@@ -25,7 +25,8 @@ config = {
     "limit_train_batches": 1.0,
     "val_check_interval": 1.0,
     "validation_split": 0.1,
-    "root": osp.join(os.getcwd(), "assets")
+    "root": osp.join(os.getcwd(), "assets"),
+    "freeze_backbone": False
 }
 
 config = edict(config)
