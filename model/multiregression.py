@@ -9,6 +9,7 @@ class MultiRegression(pl.LightningModule):
         super(MultiRegression, self).__init__()
 
         self.lr = config.lr
+        self.batch_size = config.batch_size
 
         self.model = Model(config.name_model)
 
@@ -34,7 +35,7 @@ class MultiRegression(pl.LightningModule):
 
     def forward(self, x):
         outputs = self.model(x)
-        return outputs.squeeze(-1)
+        return outputs
 
     def training_step(self, batch, batch_idx):
         """needs to return a loss from a single batch"""

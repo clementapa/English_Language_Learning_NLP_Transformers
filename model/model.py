@@ -29,13 +29,11 @@ class Model(nn.Module):
         self.pooler = MeanPooling()
 
         self.linear = nn.Linear(num_features, num_features // 2)
-        self.cls_list = nn.ModuleList(
-            [nn.Linear(num_features // 2, 1) for i in range(6)]
-        )
+        self.cls = nn.Linear(num_features // 2, 6)
 
     def forward(self, inputs):
         outputs = self.features_extractor(**inputs, return_dict=True)
         features = self.pooler(outputs["last_hidden_state"], inputs["attention_mask"])
         features = self.linear(features)
-        outputs = [cls(features) for cls in self.cls_list]
-        return torch.stack(outputs)
+        outputs = self.cls(features)
+        return outputs
