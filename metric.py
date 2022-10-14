@@ -4,9 +4,9 @@ import torch
 
 class MCRMSE(Metric):
     def __init__(self):
-        super().__init__()
-        self.add_state("mcrmse", default=torch.tensor(0), dist_reduce_fx="sum")
-        self.add_state("total", default=torch.tensor(0), dist_reduce_fx="sum")
+        super().__init__(compute_on_step=False)
+        self.add_state("mcrmse", default=torch.tensor(0, device=torch.device("cpu")), dist_reduce_fx="sum")
+        self.add_state("total", default=torch.tensor(0, device=torch.device("cpu")), dist_reduce_fx="sum")
 
     def update(self, preds: torch.Tensor, target: torch.Tensor):
         assert preds.shape == target.shape
