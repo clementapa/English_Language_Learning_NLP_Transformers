@@ -1,6 +1,7 @@
 from torchmetrics import Metric
 import torch
 
+
 class MCRMSE(Metric):
     def __init__(self):
         super().__init__()

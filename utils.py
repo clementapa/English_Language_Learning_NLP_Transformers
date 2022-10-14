@@ -1,5 +1,6 @@
 import os, errno
 
+
 def create_dir(dir_name):
     try:
         os.makedirs(dir_name)
