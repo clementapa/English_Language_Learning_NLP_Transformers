@@ -1,7 +1,6 @@
 from model.model import Model
 import torch
 from torch.optim import Adam
-import torch.nn as nn
 import pytorch_lightning as pl
 
 

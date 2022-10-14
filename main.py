@@ -29,6 +29,7 @@ parser.add_argument("--max_length", default=512)
 parser.add_argument("--gpu", default=0)
 parser.add_argument("--auto_scale_batch_size", default="power")
 parser.add_argument("--accumulate_grad_batches", default=None)
+parser.add_argument("--kaggle", default=False)
 
 config = parser.parse_args()
 
@@ -47,10 +48,14 @@ callbacks = [
         mode="min",
         verbose=True,
     ),
-    RichProgressBar(),
     LearningRateMonitor(),
     MetricCallback(),
 ]
+
+if config.kaggle:
+    config.root = "/kaggle/input"
+else:
+    callbacks += [RichProgressBar()]
 
 trainer = Trainer(
     logger=wandb_logger,
