@@ -50,7 +50,7 @@ callbacks = [
         verbose=True,
     ),
     LearningRateMonitor(),
-    # MetricCallback(),
+    MetricCallback(),
 ]
 
 if config.kaggle:
