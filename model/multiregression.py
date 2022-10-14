@@ -15,6 +15,7 @@ class MultiRegression(pl.LightningModule):
 
         # freeze backbone for fine tuned
         if config.freeze_backbone:
+            print('Freezing features extractor')
             for param in self.model.features_extractor.base_model.parameters():
                 param.requires_grad = False
 
