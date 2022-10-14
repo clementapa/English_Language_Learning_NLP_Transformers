@@ -10,8 +10,8 @@ class MetricCallback(pl.Callback):
     def on_fit_start(
         self, trainer: "pl.Trainer", pl_module: "pl.LightningModule"
     ) -> None:
-        self.mcrmse_train = MCRMSE()
-        self.mcrmse_val = MCRMSE()
+        self.mcrmse_train = MCRMSE().cpu()
+        self.mcrmse_val = MCRMSE().cpu()
 
     def on_validation_batch_end(
         self,
