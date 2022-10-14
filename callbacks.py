@@ -23,7 +23,7 @@ class MetricCallback(pl.Callback):
         dataloader_idx: int,
     ) -> None:
         _, targets = batch
-        self.mcrmse_val(outputs["preds"], targets["labels"])
+        self.mcrmse_val(outputs["preds"].cpu(), targets["labels"].cpu())
 
     def on_validation_epoch_end(
         self, trainer: "pl.Trainer", pl_module: "pl.LightningModule"
@@ -42,7 +42,7 @@ class MetricCallback(pl.Callback):
         dataloader_idx: int,
     ) -> None:
         _, targets = batch
-        self.mcrmse_train(outputs["preds"], targets["labels"])
+        self.mcrmse_train(outputs["preds"].cpu(), targets["labels"].cpu())
 
     def on_train_epoch_end(
         self, trainer: "pl.Trainer", pl_module: "pl.LightningModule"

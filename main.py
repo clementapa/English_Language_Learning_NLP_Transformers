@@ -40,6 +40,7 @@ wandb_logger = WandbLogger(
     allow_val_change=True,
     save_dir=osp.join(os.getcwd()),
 )
+
 callbacks = [
     ModelCheckpoint(
         monitor="val/loss",
