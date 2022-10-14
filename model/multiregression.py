@@ -8,16 +8,14 @@ class MultiRegression(pl.LightningModule):
     def __init__(self, config):
         super(MultiRegression, self).__init__()
 
-        self.loss = config.loss
         self.lr = config.lr  
         
         self.model = Model(config.name_model)
         
         # freeze backbone for fine tuned
         if config.freeze_backbone:
-            for name, param in self.model.named_parameters():
-                if 'cls_list' not in name: # classifier layers
-                    param.requires_grad = False
+            for param in self.model.features_extractor.base_model.parameters():
+                param.requires_grad = False
         
         self.labels = ['cohesion', 'syntax', 'vocabulary', 'phraseology', 'grammar', 'conventions']
         
@@ -28,45 +26,46 @@ class MultiRegression(pl.LightningModule):
     
     def forward(self, x):
         outputs = self.model(x)
-        return outputs
+        return outputs.squeeze(-1)
 
     def training_step(self, batch, batch_idx):
         """needs to return a loss from a single batch"""
-        losses, sum_loss, preds = self._get_preds_loss_accuracy(batch)
+        losses, preds = self._get_preds_loss_accuracy(batch)
 
         # Log loss and metric
-        self.log("train/loss", sum_loss)
+        self.log("train/loss", losses.mean())
         
-        for i, name in enumerate(self.labels):
-            self.log(f"train/{name}_loss", losses[i])
+        # for i, name in enumerate(self.labels):
+        #     self.log(f"train/{name}_loss", losses[i])
         
-        return {"loss": sum_loss, "preds": preds}
+        return {"loss": losses.mean(), "preds": preds.detach()}
 
     def validation_step(self, batch, batch_idx):
         """used for logging metrics"""
-        losses, sum_loss, preds = self._get_preds_loss_accuracy(batch)
+        losses, preds = self._get_preds_loss_accuracy(batch)
 
         # Log loss and metric
-        self.log("val/loss", sum_loss)
+        self.log("val/loss", losses.mean())
         
-        for i, name in enumerate(self.labels):
-            self.log(f"val/{name}_loss", losses[i])
+        # for i, name in enumerate(self.labels):
+        #     self.log(f"val/{name}_loss", losses[i])
 
         # Let's return preds to use it in a custom callback
         return {"preds": preds}
 
+    def loss_fn(self, outputs, targets):
+        ''' https://www.kaggle.com/competitions/feedback-prize-english-language-learning/discussion/348985 '''
+        assert outputs.shape == targets.shape
+
+        colwise_mse = torch.mean(torch.square(targets - outputs), dim=0)
+        loss = torch.mean(torch.sqrt(colwise_mse), dim=0)
+        return loss
+
     def _get_preds_loss_accuracy(self, batch):
         """convenience function since train/valid/test steps are similar"""
-        x = batch
-        preds = self(x['input_ids'])
+        inputs, targets = batch
+        preds = self(inputs)
 
-        losses = []
-        sum_loss = 0
-        for i, name in enumerate(self.labels):
-            temp_loss = self.loss(preds[i], x[name].unsqueeze(1))
-            losses.append(temp_loss)        
-            sum_loss += temp_loss
-            
-            preds[i] = preds[i].detach()
+        loss = self.loss_fn(preds, targets['labels'])
 
-        return losses, sum_loss, preds
+        return loss, preds
