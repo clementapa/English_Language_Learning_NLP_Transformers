@@ -1,35 +1,33 @@
+import argparse
 import os
 import os.path as osp
 
-import torch.nn as nn
-from easydict import EasyDict as edict
 from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import (LearningRateMonitor, ModelCheckpoint, RichProgressBar)
+from pytorch_lightning.callbacks import (LearningRateMonitor, ModelCheckpoint,
+                                         RichProgressBar)
 from pytorch_lightning.loggers import WandbLogger
 
+from callbacks import MetricCallback
+from datamodule.ell_data import ELL_data
 from model.multiregression import MultiRegression
-from datamodule.ell_data import ELL_data    
 
+parser = argparse.ArgumentParser(description='parser option')
+parser.add_argument('--name_model', default="microsoft/deberta-v3-base")
+parser.add_argument('--lr', default=0.001)
+parser.add_argument('--batch_size', default=6, type=int)
+parser.add_argument('--num_workers', default=4)
+parser.add_argument('--fast_dev_run', default=False)
+parser.add_argument('--limit_train_batches', default=1.0)
+parser.add_argument('--val_check_interval', default=1.0)
+parser.add_argument('--validation_split', default=0.1)
+parser.add_argument('--root', default=osp.join(os.getcwd(), "assets"))
+parser.add_argument('--freeze_backbone', default=False)
+parser.add_argument('--max_length', default=512)
+parser.add_argument('--gpu', default=0)
+parser.add_argument('--auto_scale_batch_size', default="power")
+parser.add_argument('--accumulate_grad_batches', default=None)
 
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
-
-name_model = "bert-base-uncased"
-
-config = {
-    "lr": 0.001,
-    "loss": nn.MSELoss(reduction='mean'),
-    "name_model": name_model,
-    "batch_size": 6,
-    "num_workers": 4,
-    "fast_dev_run":False,
-    "limit_train_batches": 1.0,
-    "val_check_interval": 1.0,
-    "validation_split": 0.1,
-    "root": osp.join(os.getcwd(), "assets"),
-    "freeze_backbone": False
-}
-
-config = edict(config)
+config = parser.parse_args()
 
 wandb_logger = WandbLogger(
     config=config,
@@ -48,18 +46,20 @@ callbacks = [
             ),
             RichProgressBar(),
             LearningRateMonitor(),
+            MetricCallback()
     ]
 
 trainer = Trainer(
     logger=wandb_logger,
-    gpus=0,
-    auto_scale_batch_size="power",
+    gpus=config.gpu,
+    auto_scale_batch_size=config.auto_scale_batch_size,
     callbacks=callbacks,
     log_every_n_steps=1,
     enable_checkpointing=True,
     fast_dev_run=config.fast_dev_run,
     limit_train_batches=config.limit_train_batches,
     val_check_interval=config.val_check_interval,
+    accumulate_grad_batches=config.accumulate_grad_batches
     )
 
 model = MultiRegression(config)
