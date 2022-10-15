@@ -9,7 +9,7 @@ class MultiRegression(pl.LightningModule):
         super(MultiRegression, self).__init__()
 
         self.config = config
-        
+
         self.lr = config.lr
         self.batch_size = config.batch_size
 
