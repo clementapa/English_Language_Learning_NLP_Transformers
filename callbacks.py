@@ -30,10 +30,10 @@ class MetricCallback(pl.Callback):
     ) -> None:
         rmse_val = self.rmse_val.compute()
         self.rmse_val.reset()
-        self.log("val/mcrmse", rmse_val['avg'])
+        self.log("val/mcrmse", rmse_val["avg"])
 
         for i in range(len(pl_module.labels)):
-            self.log(f"val/rmse_{pl_module.labels[i]}", rmse_val['per_cls'][i])
+            self.log(f"val/rmse_{pl_module.labels[i]}", rmse_val["per_cls"][i])
 
     def on_train_batch_end(
         self,
@@ -52,6 +52,6 @@ class MetricCallback(pl.Callback):
     ) -> None:
         rmse_train = self.rmse_train.compute()
         self.rmse_train.reset()
-        self.log("train/mcrmse", rmse_train['avg'])
+        self.log("train/mcrmse", rmse_train["avg"])
         for i in range(len(pl_module.labels)):
-            self.log(f"train/rmse_{pl_module.labels[i]}", rmse_train['per_cls'][i])
+            self.log(f"train/rmse_{pl_module.labels[i]}", rmse_train["per_cls"][i])

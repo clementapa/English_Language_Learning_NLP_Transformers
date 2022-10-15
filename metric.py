@@ -32,4 +32,7 @@ class MCRMSE(Metric):
         self.total += 1
 
     def compute(self):
-        return {'avg': self.mcrmse / self.total, 'per_cls': self.rmse_per_classes / self.total}
+        return {
+            "avg": self.mcrmse / self.total,
+            "per_cls": self.rmse_per_classes / self.total,
+        }
