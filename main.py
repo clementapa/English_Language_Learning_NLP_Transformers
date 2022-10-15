@@ -3,16 +3,14 @@ import os
 import os.path as osp
 
 from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import (
-    LearningRateMonitor,
-    ModelCheckpoint,
-    RichProgressBar,
-)
+from pytorch_lightning.callbacks import (LearningRateMonitor, ModelCheckpoint,
+                                         RichProgressBar)
 from pytorch_lightning.loggers import WandbLogger
 
 from callbacks import MetricCallback
 from datamodule.ell_data import ELL_data
 from model.multiregression import MultiRegression
+from utils import create_dir
 
 parser = argparse.ArgumentParser(description="parser option")
 parser.add_argument("--name_model", default="microsoft/deberta-v3-base")
@@ -34,6 +32,8 @@ parser.add_argument("--tune", default=False)
 
 
 config = parser.parse_args()
+
+create_dir(osp.join(os.getcwd(), 'exp', 'weights'))
 
 wandb_logger = WandbLogger(
     config=config,
