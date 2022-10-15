@@ -33,14 +33,22 @@ class MultiRegression(pl.LightningModule):
     def configure_optimizers(self):
         """defines model optimizer"""
         out_dict = {}
-        out_dict['optimizer'] = optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.config.weight_decay)
-        if self.config.scheduler!=None:
+        out_dict["optimizer"] = optim.Adam(
+            self.model.parameters(), lr=self.lr, weight_decay=self.config.weight_decay
+        )
+        if self.config.scheduler != None:
             if self.config.scheduler == "CosineAnnealingLR":
-                out_dict['scheduler'] = optim.lr_scheduler.CosineAnnealingLR(out_dict['optimizer'], self.config.T_max)
+                out_dict["scheduler"] = optim.lr_scheduler.CosineAnnealingLR(
+                    out_dict["optimizer"], self.config.T_max
+                )
             elif self.config.scheduler == "StepLR":
-                out_dict['scheduler'] = optim.lr_scheduler.StepLR(out_dict['optimizer'], self.config.step_size_scheduler)
+                out_dict["scheduler"] = optim.lr_scheduler.StepLR(
+                    out_dict["optimizer"], self.config.step_size_scheduler
+                )
             else:
-                raise NotImplementedError(f'{self.config.scheduler} scheduler not supported')
+                raise NotImplementedError(
+                    f"{self.config.scheduler} scheduler not supported"
+                )
         return out_dict
 
     def forward(self, x):
