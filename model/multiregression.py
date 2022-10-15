@@ -1,6 +1,6 @@
 from model.model import Model
 import torch
-from torch.optim import Adam
+import torch.optim as optim
 import pytorch_lightning as pl
 
 
@@ -9,7 +9,7 @@ class MultiRegression(pl.LightningModule):
         super(MultiRegression, self).__init__()
 
         self.config = config
-        
+
         self.lr = config.lr
         self.batch_size = config.batch_size
 
@@ -32,8 +32,16 @@ class MultiRegression(pl.LightningModule):
 
     def configure_optimizers(self):
         """defines model optimizer"""
-        optimizer = Adam(self.model.parameters(), lr=self.lr)
-        return optimizer
+        out_dict = {}
+        out_dict['optimizer'] = optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.config.weight_decay)
+        if self.config.scheduler!=None:
+            if self.config.scheduler == "CosineAnnealingLR":
+                out_dict['scheduler'] = optim.lr_scheduler.CosineAnnealingLR(out_dict['optimizer'], self.config.T_max)
+            elif self.config.scheduler == "StepLR":
+                out_dict['scheduler'] = optim.lr_scheduler.StepLR(out_dict['optimizer'], self.config.step_size_scheduler)
+            else:
+                raise NotImplementedError(f'{self.config.scheduler} scheduler not supported')
+        return out_dict
 
     def forward(self, x):
         outputs = self.model(x)
