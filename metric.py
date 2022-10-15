@@ -23,7 +23,7 @@ class MCRMSE(Metric):
         loss = torch.mean(torch.sqrt(colwise_mse), dim=0)
 
         self.mcrmse += loss.long()
-        self.total += target.shape[0]
+        self.total += 1
 
     def compute(self):
         return self.mcrmse.float() / self.total
