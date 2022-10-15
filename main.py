@@ -3,8 +3,11 @@ import os
 import os.path as osp
 
 from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import (LearningRateMonitor, ModelCheckpoint,
-                                         RichProgressBar)
+from pytorch_lightning.callbacks import (
+    LearningRateMonitor,
+    ModelCheckpoint,
+    RichProgressBar,
+)
 from pytorch_lightning.loggers import WandbLogger
 
 from callbacks import MetricCallback
@@ -33,7 +36,7 @@ parser.add_argument("--tune", default=False)
 
 config = parser.parse_args()
 
-create_dir(osp.join(os.getcwd(), 'exp', 'weights'))
+create_dir(osp.join(os.getcwd(), "exp", "weights"))
 
 wandb_logger = WandbLogger(
     config=config,
