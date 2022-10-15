@@ -8,10 +8,12 @@ class MultiRegression(pl.LightningModule):
     def __init__(self, config):
         super(MultiRegression, self).__init__()
 
+        self.config = config
+        
         self.lr = config.lr
         self.batch_size = config.batch_size
 
-        self.model = Model(config.name_model)
+        self.model = Model(config.name_model, config.nb_of_linears)
 
         # freeze backbone for fine tuned
         if config.freeze_backbone:
