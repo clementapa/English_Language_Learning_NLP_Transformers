@@ -32,7 +32,9 @@ class Model(nn.Module):
             temp_num_features = num_features
             self.linears = nn.ModuleList()
             for i in range(nb_of_linears):
-                self.linears.append(nn.Linear(temp_num_features, temp_num_features // 2))
+                self.linears.append(
+                    nn.Linear(temp_num_features, temp_num_features // 2)
+                )
                 self._initialize_weights(self.linears[i])
                 temp_num_features = temp_num_features // 2
             num_features = temp_num_features
@@ -48,8 +50,7 @@ class Model(nn.Module):
                 features = layer(features)
         outputs = self.cls(features)
         return outputs
-    
+
     def _initialize_weights(self, m):
         nn.init.orthogonal_(m.weight.data)
-        nn.init.constant_(m.bias.data, 0)        
-
+        nn.init.constant_(m.bias.data, 0)
