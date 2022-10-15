@@ -30,6 +30,8 @@ parser.add_argument("--gpu", default=0)
 parser.add_argument("--auto_scale_batch_size", default="power")
 parser.add_argument("--accumulate_grad_batches", default=None)
 parser.add_argument("--kaggle", default=False)
+parser.add_argument("--tune", default=False)
+
 
 config = parser.parse_args()
 
@@ -38,13 +40,13 @@ wandb_logger = WandbLogger(
     project="ELL",
     entity="clementapa",
     allow_val_change=True,
-    save_dir=osp.join(os.getcwd()),
+    save_dir=osp.join(os.getcwd(), 'exp'),
 )
 
 callbacks = [
     ModelCheckpoint(
         monitor="val/loss",
-        dirpath=osp.join(os.getcwd(), "weights"),  #'/kaggle/working/',
+        dirpath=osp.join(os.getcwd(), 'exp', "weights"),  #'/kaggle/working/',
         filename="best-model",
         mode="min",
         verbose=True,
@@ -69,8 +71,11 @@ trainer = Trainer(
     limit_train_batches=config.limit_train_batches,
     val_check_interval=config.val_check_interval,
     accumulate_grad_batches=config.accumulate_grad_batches,
+    default_root_dir=osp.join(os.getcwd(), 'exp')
 )
 
 model = MultiRegression(config)
 dataset_module = ELL_data(config)
-trainer.fit(model, dataset_module)
+
+if config.tune: trainer.tune(model, datamodule=dataset_module)
+trainer.fit(model, datamodule=dataset_module)
