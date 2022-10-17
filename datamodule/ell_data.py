@@ -1,11 +1,10 @@
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
-from datasets import load_dataset, Dataset, load_from_disk
 from transformers import AutoTokenizer
 import os.path as osp
 from sklearn.model_selection import train_test_split
 from datamodule.essay_dataset import EssayDataset
-
+import pandas as pd
 
 class ELL_data(pl.LightningDataModule):
     def __init__(self, config):
@@ -31,27 +30,22 @@ class ELL_data(pl.LightningDataModule):
                 "assets", f"dataset_train_val_{self.validation_split}.hf"
             )
             if not osp.isdir(data_dir):
-                dataset = load_dataset(
-                    "csv",
-                    data_files=osp.join(
+                dataset = pd.read_csv(osp.join(
                         self.root, "feedback-prize-english-language-learning/train.csv"
-                    ),
+                    )
                 )
                 train, val = train_test_split(
-                    dataset["train"], test_size=self.validation_split, random_state=13
+                    dataset, test_size=self.validation_split, random_state=13
                 )
-                dataset["train"] = Dataset.from_dict(train)
-                dataset["val"] = Dataset.from_dict(val)
+
                 self.dataset = dataset
                 self.dataset.save_to_disk(data_dir)
-            else:
-                self.dataset = load_from_disk(data_dir)
+            # else:
+            #     self.dataset = load_from_disk(data_dir)
         else:
-            self.dataset = load_dataset(
-                "csv",
-                data_files=osp.join(
+            self.dataset = pd.read_csv(osp.join(
                     self.root, "feedback-prize-english-language-learning/test.csv"
-                ),
+                )
             )
 
     def setup(self, stage=None):
@@ -65,7 +59,7 @@ class ELL_data(pl.LightningDataModule):
             )
         else:
             self.predict_set = EssayDataset(
-                self.dataset["train"],
+                self.dataset,
                 self.config.max_length,
                 tokenizer=self.tokenizer,
                 is_test=True,

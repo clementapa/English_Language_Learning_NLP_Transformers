@@ -18,7 +18,7 @@ class EssayDataset:
         self.is_test = is_test
 
     def __getitem__(self, idx):
-        sample = self.df[idx]["full_text"]
+        sample = self.df.iloc[idx]["full_text"]
         tokenized = self.tokenizer.encode_plus(
             sample,
             None,
