@@ -18,30 +18,40 @@ from utils import create_dir
 import pandas as pd
 
 parser = argparse.ArgumentParser(description="parser option")
-parser.add_argument("--name_model", default="microsoft/deberta-v3-base")
-parser.add_argument("--lr", default=0.001)
-parser.add_argument("--batch_size", default=6, type=int)
-parser.add_argument("--num_workers", default=4)
-parser.add_argument("--fast_dev_run", default=False)
-parser.add_argument("--limit_train_batches", default=1.0)
-parser.add_argument("--val_check_interval", default=1.0)
-parser.add_argument("--validation_split", default=0.1)
-parser.add_argument("--root", default=osp.join(os.getcwd(), "assets"))
+
+# model params
+parser.add_argument("--name_model", default="microsoft/deberta-v3-base", type=str)
+parser.add_argument("--nb_of_linears", default=1, type=int)
 parser.add_argument("--freeze_backbone", default=False)
-parser.add_argument("--max_length", default=512)
-parser.add_argument("--gpu", default=0)
+parser.add_argument("--save_pretrained", default="pretrained", type=str)
+parser.add_argument("--max_length", default=512, type=int)
+
+# optimization params
+parser.add_argument("--lr", default=0.001, type=float)
+parser.add_argument("--batch_size", default=6, type=int)
+parser.add_argument("--scheduler", default=None)
+parser.add_argument("--T_max", default=1, type=int)
+parser.add_argument("--step_size_scheduler", default=1, type=int)
+parser.add_argument("--weight_decay", default=0, type=int)
 parser.add_argument("--auto_scale_batch_size", default="power")
 parser.add_argument("--accumulate_grad_batches", default=None)
-parser.add_argument("--kaggle", default=False)
-parser.add_argument("--tune", default=False)
-parser.add_argument("--nb_of_linears", default=1, type=int)
-parser.add_argument("--scheduler", default=None)
-parser.add_argument("--T_max", default=1)
-parser.add_argument("--step_size_scheduler", default=1)
-parser.add_argument("--weight_decay", default=0)
+
+# dataset params
+parser.add_argument("--num_workers", default=4, type=int)
+parser.add_argument("--validation_split", default=0.1, type=float)
+parser.add_argument("--root", default=osp.join(os.getcwd(), "assets"), type=str)
+
+# trainer params
+parser.add_argument("--gpu", default=0, type=int)
+parser.add_argument("--fast_dev_run", default=False, type=bool) 
+parser.add_argument("--limit_train_batches", default=1.0, type=float)
+parser.add_argument("--val_check_interval", default=1.0, type=float)
+parser.add_argument("--kaggle", default=False, type=bool)
+parser.add_argument("--tune", default=False, type=bool)
+
+# inference params
 parser.add_argument("--test", default=False)
-parser.add_argument("--ckpt_path", default="exp/weights/charmed-pond-48.ckpt")
-parser.add_argument("--save_pretrained", default="pretrained")
+parser.add_argument("--ckpt_path", default="exp/weights/charmed-pond-48.ckpt", type=str)
 
 config = parser.parse_args()
 
