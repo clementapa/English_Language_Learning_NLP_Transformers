@@ -74,11 +74,12 @@ if not config.test:
 
     callbacks = [
         ModelCheckpoint(
-            monitor="val/loss",
+            monitor="val/mcrmse",
             dirpath=osp.join(os.getcwd(), "exp", "weights"),  #'/kaggle/working/',
-            filename="best-model",
+            save_top_k=5,
             mode="min",
             verbose=True,
+            auto_insert_metric_name=True
         ),
         LearningRateMonitor(),
         MetricCallback(),
