@@ -5,7 +5,7 @@ import os.path as osp
 from sklearn.model_selection import train_test_split
 from datamodule.essay_dataset import EssayDataset
 import pandas as pd
-
+from utils import create_dir
 
 class ELL_data(pl.LightningDataModule):
     def __init__(self, config):
@@ -28,7 +28,7 @@ class ELL_data(pl.LightningDataModule):
     def prepare_data(self) -> None:
         if not self.config.test:
             data_dir = osp.join(
-                "assets", f"dataset_train_val_{self.validation_split}.hf"
+                "assets", f"dataset_train_val_{self.validation_split}"
             )
             if not osp.isdir(data_dir):
                 dataset = pd.read_csv(
@@ -36,14 +36,23 @@ class ELL_data(pl.LightningDataModule):
                         self.root, "feedback-prize-english-language-learning/train.csv"
                     )
                 )
-                train, val = train_test_split(
+                self.train_set, self.val_set = train_test_split(
                     dataset, test_size=self.validation_split, random_state=13
                 )
-
-                self.dataset = dataset
-                self.dataset.save_to_disk(data_dir)
-            # else:
-            #     self.dataset = load_from_disk(data_dir)
+                create_dir(data_dir)
+                self.train_set.to_csv(osp.join(data_dir,'train.csv'), index=False)
+                self.val_set.to_csv(osp.join(data_dir,'val.csv'), index=False)
+            else:
+                self.train_set = pd.read_csv(
+                    osp.join(
+                        data_dir, "train.csv"
+                    )
+                )
+                self.val_set = pd.read_csv(
+                    osp.join(
+                        data_dir, "val.csv"
+                    )
+                )
         else:
             self.dataset = pd.read_csv(
                 osp.join(self.root, "feedback-prize-english-language-learning/test.csv")
@@ -53,10 +62,10 @@ class ELL_data(pl.LightningDataModule):
         # split dataset
         if stage in (None, "fit"):
             self.train_set = EssayDataset(
-                self.dataset["train"], self.config.max_length, tokenizer=self.tokenizer
+                self.train_set, self.config.max_length, tokenizer=self.tokenizer
             )
             self.val_set = EssayDataset(
-                self.dataset["val"], self.config.max_length, tokenizer=self.tokenizer
+                self.val_set, self.config.max_length, tokenizer=self.tokenizer
             )
         else:
             self.predict_set = EssayDataset(

@@ -4,7 +4,7 @@ from operator import itemgetter
 
 class EssayDataset:
     def __init__(self, df, max_length, tokenizer=None, is_test=False):
-        self.df = df
+        self.df = df.reset_index(drop=True)
         self.classes = [
             "cohesion",
             "syntax",
@@ -40,7 +40,7 @@ class EssayDataset:
         if self.is_test == True:
             return inputs
 
-        label = itemgetter(*self.classes)(self.df[idx])
+        label = itemgetter(*self.classes)(self.df.iloc[idx])
         targets = {
             "labels": torch.tensor(label, dtype=torch.float32),
         }
