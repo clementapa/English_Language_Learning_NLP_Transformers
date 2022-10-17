@@ -22,7 +22,9 @@ class ELL_data(pl.LightningDataModule):
 
     def prepare_data(self) -> None:
         if not self.config.test:
-            data_dir = osp.join("assets", f"dataset_train_val_{self.validation_split}.hf")
+            data_dir = osp.join(
+                "assets", f"dataset_train_val_{self.validation_split}.hf"
+            )
             if not osp.isdir(data_dir):
                 dataset = load_dataset(
                     "csv",
@@ -41,11 +43,11 @@ class ELL_data(pl.LightningDataModule):
                 self.dataset = load_from_disk(data_dir)
         else:
             self.dataset = load_dataset(
-                    "csv",
-                    data_files=osp.join(
-                        self.root, "feedback-prize-english-language-learning/test.csv"
-                    ),
-                )     
+                "csv",
+                data_files=osp.join(
+                    self.root, "feedback-prize-english-language-learning/test.csv"
+                ),
+            )
 
     def setup(self, stage=None):
         # split dataset
@@ -58,9 +60,11 @@ class ELL_data(pl.LightningDataModule):
             )
         else:
             self.predict_set = EssayDataset(
-                self.dataset['train'], self.config.max_length, tokenizer=self.tokenizer, 
-                is_test=True
-                )
+                self.dataset["train"],
+                self.config.max_length,
+                tokenizer=self.tokenizer,
+                is_test=True,
+            )
 
     def train_dataloader(self):
         train = DataLoader(
@@ -84,6 +88,6 @@ class ELL_data(pl.LightningDataModule):
             self.predict_set,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            shuffle=False
+            shuffle=False,
         )
         return predict

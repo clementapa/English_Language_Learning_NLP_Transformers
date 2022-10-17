@@ -38,8 +38,8 @@ class Model(nn.Module):
         #         self._initialize_weights(self.linears[i])
         #         temp_num_features = temp_num_features // 2
         #     num_features = temp_num_features
-        self.linear = nn.Linear(num_features, num_features//2)
-        self.cls = nn.Linear(num_features//2, 6)
+        self.linear = nn.Linear(num_features, num_features // 2)
+        self.cls = nn.Linear(num_features // 2, 6)
         self._initialize_weights(self.cls)
 
     def forward(self, inputs):

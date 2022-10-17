@@ -44,10 +44,10 @@ parser.add_argument("--ckpt_path", default="exp/weights/charmed-pond-48.ckpt")
 
 config = parser.parse_args()
 
-if not config.test: 
+if not config.test:
 
     create_dir(osp.join(os.getcwd(), "exp", "weights"))
-    
+
     wandb_logger = WandbLogger(
         config=config,
         project="ELL",
@@ -104,25 +104,30 @@ else:
         default_root_dir=osp.join(os.getcwd(), "exp"),
     )
 
-    preds = trainer.predict(model, datamodule=dataset_module, ckpt_path=config.ckpt_path)
+    preds = trainer.predict(
+        model, datamodule=dataset_module, ckpt_path=config.ckpt_path
+    )
 
     raw_predictions = torch.cat(preds, axis=0)
     y_pred = raw_predictions.detach().cpu().numpy()
-    text_id = dataset_module.predict_set.df['text_id']
+    text_id = dataset_module.predict_set.df["text_id"]
 
-    output_df = pd.DataFrame({'text_id': {},
-                            'cohesion': {},
-                            'syntax': {},
-                            'vocabulary': {},
-                            'phraseology': {},
-                            'grammar': {},
-                            'conventions': {}}
-                            )
+    output_df = pd.DataFrame(
+        {
+            "text_id": {},
+            "cohesion": {},
+            "syntax": {},
+            "vocabulary": {},
+            "phraseology": {},
+            "grammar": {},
+            "conventions": {},
+        }
+    )
 
     output_df["text_id"] = text_id
 
     for i, label in enumerate(model.labels):
-        output_df[label] = y_pred[:,i]
+        output_df[label] = y_pred[:, i]
 
     create_dir("submissions")
 

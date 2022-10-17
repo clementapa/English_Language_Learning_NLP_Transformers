@@ -84,7 +84,7 @@ class MultiRegression(pl.LightningModule):
         inputs = batch
         preds = self(inputs)
         return preds
-        
+
     def loss_fn(self, outputs, targets):
         """https://www.kaggle.com/competitions/feedback-prize-english-language-learning/discussion/348985"""
         assert outputs.shape == targets.shape
