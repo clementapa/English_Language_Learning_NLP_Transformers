@@ -41,9 +41,8 @@ class MetricCallback(pl.Callback):
         pl_module: "pl.LightningModule",
         outputs,
         batch,
-        batch_idx: int,
-        dataloader_idx: int,
-    ) -> None:
+        batch_idx: int
+        ) -> None:
         _, targets = batch
         self.rmse_train(outputs["preds"].cpu(), targets["labels"].cpu())
 

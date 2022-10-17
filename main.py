@@ -44,6 +44,9 @@ parser.add_argument("--ckpt_path", default="exp/weights/charmed-pond-48.ckpt")
 
 config = parser.parse_args()
 
+if config.kaggle:
+    config.root = "/kaggle/input"
+
 if not config.test:
 
     create_dir(osp.join(os.getcwd(), "exp", "weights"))
@@ -68,9 +71,7 @@ if not config.test:
         MetricCallback(),
     ]
 
-    if config.kaggle:
-        config.root = "/kaggle/input"
-    else:
+    if not config.kaggle:
         callbacks += [RichProgressBar()]
 
     trainer = Trainer(
