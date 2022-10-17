@@ -43,7 +43,7 @@ parser.add_argument("--root", default=osp.join(os.getcwd(), "assets"), type=str)
 
 # trainer params
 parser.add_argument("--gpu", default=0, type=int)
-parser.add_argument("--fast_dev_run", default=False, type=bool) 
+parser.add_argument("--fast_dev_run", default=False, type=bool)
 parser.add_argument("--limit_train_batches", default=1.0, type=float)
 parser.add_argument("--val_check_interval", default=1.0, type=float)
 parser.add_argument("--kaggle", default=False, type=bool)
