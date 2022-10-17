@@ -134,3 +134,4 @@ assets/*
 exp/*
 submission*
 pretrained/*
+*.zip
