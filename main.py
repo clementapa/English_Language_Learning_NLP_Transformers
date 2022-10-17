@@ -35,6 +35,7 @@ parser.add_argument("--step_size_scheduler", default=1, type=int)
 parser.add_argument("--weight_decay", default=0, type=int)
 parser.add_argument("--auto_scale_batch_size", default="power")
 parser.add_argument("--accumulate_grad_batches", default=None)
+parser.add_argument("--max_epochs", default=-1, type=int)
 
 # dataset params
 parser.add_argument("--num_workers", default=4, type=int)
@@ -100,6 +101,7 @@ if not config.test:
         val_check_interval=config.val_check_interval,
         accumulate_grad_batches=config.accumulate_grad_batches,
         default_root_dir=osp.join(os.getcwd(), "exp"),
+        max_epochs=config.max_epochs,
     )
 
     model = MultiRegression(config)
