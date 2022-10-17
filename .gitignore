@@ -132,3 +132,5 @@ wandb/
 assets/*
 .vscode/
 exp/*
+submission*
+pretrained/*
