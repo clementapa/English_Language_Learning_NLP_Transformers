@@ -18,7 +18,7 @@ class ELL_data(pl.LightningDataModule):
 
         self.validation_split = config.validation_split
 
-        save_pretrained_tokenizer = osp.join(config.save_pretrained, 'tokenizer')
+        save_pretrained_tokenizer = osp.join(config.save_pretrained, "tokenizer")
         if osp.isdir(save_pretrained_tokenizer):
             self.tokenizer = AutoTokenizer.from_pretrained(save_pretrained_tokenizer)
         else:

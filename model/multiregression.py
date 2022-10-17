@@ -14,7 +14,11 @@ class MultiRegression(pl.LightningModule):
         self.lr = config.lr
         self.batch_size = config.batch_size
 
-        self.model = Model(config.name_model, config.nb_of_linears, osp.join(config.save_pretrained, 'model'))
+        self.model = Model(
+            config.name_model,
+            config.nb_of_linears,
+            osp.join(config.save_pretrained, "model"),
+        )
 
         # freeze backbone for fine tuned
         if config.freeze_backbone:

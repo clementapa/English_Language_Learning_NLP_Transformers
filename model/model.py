@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch
 import os.path as osp
 
+
 class MeanPooling(nn.Module):
     def __init__(self):
         super(MeanPooling, self).__init__()
@@ -21,7 +22,7 @@ class MeanPooling(nn.Module):
 class Model(nn.Module):
     def __init__(self, name_model, nb_of_linears, save_pretrained):
         super(Model, self).__init__()
-        
+
         if osp.isdir(save_pretrained):
             self.features_extractor = AutoModel.from_pretrained(save_pretrained)
         else:
