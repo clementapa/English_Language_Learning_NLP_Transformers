@@ -79,7 +79,7 @@ if not config.test:
             save_top_k=5,
             mode="min",
             verbose=True,
-            auto_insert_metric_name=True
+            auto_insert_metric_name=True,
         ),
         LearningRateMonitor(),
         MetricCallback(),
