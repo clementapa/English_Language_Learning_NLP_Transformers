@@ -1,7 +1,7 @@
 from transformers import AutoModel
 import torch.nn as nn
 import torch
-
+import os.path as osp
 
 class MeanPooling(nn.Module):
     def __init__(self):
@@ -19,9 +19,15 @@ class MeanPooling(nn.Module):
 
 
 class Model(nn.Module):
-    def __init__(self, name_model, nb_of_linears):
+    def __init__(self, name_model, nb_of_linears, save_pretrained):
         super(Model, self).__init__()
-        self.features_extractor = AutoModel.from_pretrained(name_model)
+        
+        if osp.isdir(save_pretrained):
+            self.features_extractor = AutoModel.from_pretrained(save_pretrained)
+        else:
+            self.features_extractor = AutoModel.from_pretrained(name_model)
+            self.features_extractor.save_pretrained(save_pretrained)
+
         num_features = self.features_extractor(
             self.features_extractor.dummy_inputs["input_ids"]
         )["last_hidden_state"].shape[-1]

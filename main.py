@@ -41,11 +41,14 @@ parser.add_argument("--step_size_scheduler", default=1)
 parser.add_argument("--weight_decay", default=0)
 parser.add_argument("--test", default=True)
 parser.add_argument("--ckpt_path", default="exp/weights/charmed-pond-48.ckpt")
+parser.add_argument("--save_pretrained", default="pretrained")
 
 config = parser.parse_args()
 
 if config.kaggle:
     config.root = "/kaggle/input"
+
+config.save_pretrained = osp.join(config.save_pretrained, config.name_model)
 
 if not config.test:
 

@@ -4,7 +4,6 @@ from datasets import load_dataset, Dataset, load_from_disk
 from transformers import AutoTokenizer
 import os.path as osp
 from sklearn.model_selection import train_test_split
-from utils import create_dir
 from datamodule.essay_dataset import EssayDataset
 
 
@@ -18,7 +17,13 @@ class ELL_data(pl.LightningDataModule):
         self.config = config
 
         self.validation_split = config.validation_split
-        self.tokenizer = AutoTokenizer.from_pretrained(config.name_model)
+
+        save_pretrained_tokenizer = osp.join(config.save_pretrained, 'tokenizer')
+        if osp.isdir(save_pretrained_tokenizer):
+            self.tokenizer = AutoTokenizer.from_pretrained(save_pretrained_tokenizer)
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained(config.name_model)
+            self.tokenizer.save_pretrained(save_pretrained_tokenizer)
 
     def prepare_data(self) -> None:
         if not self.config.test:
