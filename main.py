@@ -76,7 +76,7 @@ if not config.test:
         ModelCheckpoint(
             monitor="val/mcrmse",
             dirpath=osp.join(os.getcwd(), "exp", "weights"),  #'/kaggle/working/',
-            save_top_k=5,
+            save_top_k=2,
             mode="min",
             verbose=True,
             auto_insert_metric_name=False,
