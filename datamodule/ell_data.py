@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from datamodule.essay_dataset import EssayDataset
 import pandas as pd
 
+
 class ELL_data(pl.LightningDataModule):
     def __init__(self, config):
         super(ELL_data, self).__init__()
@@ -30,7 +31,8 @@ class ELL_data(pl.LightningDataModule):
                 "assets", f"dataset_train_val_{self.validation_split}.hf"
             )
             if not osp.isdir(data_dir):
-                dataset = pd.read_csv(osp.join(
+                dataset = pd.read_csv(
+                    osp.join(
                         self.root, "feedback-prize-english-language-learning/train.csv"
                     )
                 )
@@ -43,9 +45,8 @@ class ELL_data(pl.LightningDataModule):
             # else:
             #     self.dataset = load_from_disk(data_dir)
         else:
-            self.dataset = pd.read_csv(osp.join(
-                    self.root, "feedback-prize-english-language-learning/test.csv"
-                )
+            self.dataset = pd.read_csv(
+                osp.join(self.root, "feedback-prize-english-language-learning/test.csv")
             )
 
     def setup(self, stage=None):
