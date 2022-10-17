@@ -28,26 +28,27 @@ class Model(nn.Module):
 
         self.pooler = MeanPooling()
 
-        if nb_of_linears != 0:
-            temp_num_features = num_features
-            self.linears = nn.ModuleList()
-            for i in range(nb_of_linears):
-                self.linears.append(
-                    nn.Linear(temp_num_features, temp_num_features // 2)
-                )
-                self._initialize_weights(self.linears[i])
-                temp_num_features = temp_num_features // 2
-            num_features = temp_num_features
-
-        self.cls = nn.Linear(num_features, 6)
+        # if nb_of_linears != 0:
+        #     temp_num_features = num_features
+        #     self.linears = nn.ModuleList()
+        #     for i in range(nb_of_linears):
+        #         self.linears.append(
+        #             nn.Linear(temp_num_features, temp_num_features // 2)
+        #         )
+        #         self._initialize_weights(self.linears[i])
+        #         temp_num_features = temp_num_features // 2
+        #     num_features = temp_num_features
+        self.linear = nn.Linear(num_features, num_features//2)
+        self.cls = nn.Linear(num_features//2, 6)
         self._initialize_weights(self.cls)
 
     def forward(self, inputs):
         outputs = self.features_extractor(**inputs, return_dict=True)
         features = self.pooler(outputs["last_hidden_state"], inputs["attention_mask"])
-        if hasattr(self, "linears"):
-            for layer in self.linears:
-                features = layer(features)
+        # if hasattr(self, "linears"):
+        #     for layer in self.linears:
+        #         features = layer(features)
+        features = self.linear(features)
         outputs = self.cls(features)
         return outputs
 

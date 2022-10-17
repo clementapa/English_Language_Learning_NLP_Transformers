@@ -21,23 +21,31 @@ class ELL_data(pl.LightningDataModule):
         self.tokenizer = AutoTokenizer.from_pretrained(config.name_model)
 
     def prepare_data(self) -> None:
-        data_dir = osp.join("assets", f"dataset_train_val_{self.validation_split}.hf")
-        if not osp.isdir(data_dir):
-            dataset = load_dataset(
-                "csv",
-                data_files=osp.join(
-                    self.root, "feedback-prize-english-language-learning/train.csv"
-                ),
-            )
-            train, val = train_test_split(
-                dataset["train"], test_size=self.validation_split, random_state=13
-            )
-            dataset["train"] = Dataset.from_dict(train)
-            dataset["val"] = Dataset.from_dict(val)
-            self.dataset = dataset
-            self.dataset.save_to_disk(data_dir)
+        if not self.config.test:
+            data_dir = osp.join("assets", f"dataset_train_val_{self.validation_split}.hf")
+            if not osp.isdir(data_dir):
+                dataset = load_dataset(
+                    "csv",
+                    data_files=osp.join(
+                        self.root, "feedback-prize-english-language-learning/train.csv"
+                    ),
+                )
+                train, val = train_test_split(
+                    dataset["train"], test_size=self.validation_split, random_state=13
+                )
+                dataset["train"] = Dataset.from_dict(train)
+                dataset["val"] = Dataset.from_dict(val)
+                self.dataset = dataset
+                self.dataset.save_to_disk(data_dir)
+            else:
+                self.dataset = load_from_disk(data_dir)
         else:
-            self.dataset = load_from_disk(data_dir)
+            self.dataset = load_dataset(
+                    "csv",
+                    data_files=osp.join(
+                        self.root, "feedback-prize-english-language-learning/test.csv"
+                    ),
+                )     
 
     def setup(self, stage=None):
         # split dataset
@@ -49,7 +57,10 @@ class ELL_data(pl.LightningDataModule):
                 self.dataset["val"], self.config.max_length, tokenizer=self.tokenizer
             )
         else:
-            self.test_set = EssayDataset(self.dataset["test"])
+            self.predict_set = EssayDataset(
+                self.dataset['train'], self.config.max_length, tokenizer=self.tokenizer, 
+                is_test=True
+                )
 
     def train_dataloader(self):
         train = DataLoader(
@@ -68,18 +79,11 @@ class ELL_data(pl.LightningDataModule):
         )
         return val
 
-    def test_dataloader(self):
-        test = DataLoader(
-            self.test,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
-        )
-        return test
-
     def predict_dataloader(self):
         predict = DataLoader(
-            self.predict,
+            self.predict_set,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
+            shuffle=False
         )
         return predict

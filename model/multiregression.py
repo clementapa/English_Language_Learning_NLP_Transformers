@@ -80,6 +80,11 @@ class MultiRegression(pl.LightningModule):
         # Let's return preds to use it in a custom callback
         return {"preds": preds}
 
+    def predict_step(self, batch, batch_idx):
+        inputs = batch
+        preds = self(inputs)
+        return preds
+        
     def loss_fn(self, outputs, targets):
         """https://www.kaggle.com/competitions/feedback-prize-english-language-learning/discussion/348985"""
         assert outputs.shape == targets.shape

@@ -9,11 +9,13 @@ from pytorch_lightning.callbacks import (
     RichProgressBar,
 )
 from pytorch_lightning.loggers import WandbLogger
+import torch
 
 from callbacks import MetricCallback
 from datamodule.ell_data import ELL_data
 from model.multiregression import MultiRegression
 from utils import create_dir
+import pandas as pd
 
 parser = argparse.ArgumentParser(description="parser option")
 parser.add_argument("--name_model", default="microsoft/deberta-v3-base")
@@ -32,58 +34,99 @@ parser.add_argument("--auto_scale_batch_size", default="power")
 parser.add_argument("--accumulate_grad_batches", default=None)
 parser.add_argument("--kaggle", default=False)
 parser.add_argument("--tune", default=False)
-parser.add_argument("--nb_of_linears", default=2)
+parser.add_argument("--nb_of_linears", default=1)
 parser.add_argument("--scheduler", default=None)
 parser.add_argument("--T_max", default=1)
 parser.add_argument("--step_size_scheduler", default=1)
 parser.add_argument("--weight_decay", default=0)
+parser.add_argument("--test", default=True)
+parser.add_argument("--ckpt_path", default="exp/weights/charmed-pond-48.ckpt")
 
 config = parser.parse_args()
 
-create_dir(osp.join(os.getcwd(), "exp", "weights"))
+if not config.test: 
 
-wandb_logger = WandbLogger(
-    config=config,
-    project="ELL",
-    entity="clementapa",
-    allow_val_change=True,
-    save_dir=osp.join(os.getcwd(), "exp"),
-)
+    create_dir(osp.join(os.getcwd(), "exp", "weights"))
+    
+    wandb_logger = WandbLogger(
+        config=config,
+        project="ELL",
+        entity="clementapa",
+        allow_val_change=True,
+        save_dir=osp.join(os.getcwd(), "exp"),
+    )
 
-callbacks = [
-    ModelCheckpoint(
-        monitor="val/loss",
-        dirpath=osp.join(os.getcwd(), "exp", "weights"),  #'/kaggle/working/',
-        filename="best-model",
-        mode="min",
-        verbose=True,
-    ),
-    LearningRateMonitor(),
-    MetricCallback(),
-]
+    callbacks = [
+        ModelCheckpoint(
+            monitor="val/loss",
+            dirpath=osp.join(os.getcwd(), "exp", "weights"),  #'/kaggle/working/',
+            filename="best-model",
+            mode="min",
+            verbose=True,
+        ),
+        LearningRateMonitor(),
+        MetricCallback(),
+    ]
 
-if config.kaggle:
-    config.root = "/kaggle/input"
+    if config.kaggle:
+        config.root = "/kaggle/input"
+    else:
+        callbacks += [RichProgressBar()]
+
+    trainer = Trainer(
+        logger=wandb_logger,
+        gpus=config.gpu,
+        auto_scale_batch_size=config.auto_scale_batch_size,
+        callbacks=callbacks,
+        log_every_n_steps=1,
+        enable_checkpointing=True,
+        fast_dev_run=config.fast_dev_run,
+        limit_train_batches=config.limit_train_batches,
+        val_check_interval=config.val_check_interval,
+        accumulate_grad_batches=config.accumulate_grad_batches,
+        default_root_dir=osp.join(os.getcwd(), "exp"),
+    )
+
+    model = MultiRegression(config)
+    dataset_module = ELL_data(config)
+
+    if config.tune:
+        trainer.tune(model, datamodule=dataset_module)
+    trainer.fit(model, datamodule=dataset_module)
+
 else:
-    callbacks += [RichProgressBar()]
+    model = MultiRegression(config)
+    dataset_module = ELL_data(config)
 
-trainer = Trainer(
-    logger=wandb_logger,
-    gpus=config.gpu,
-    auto_scale_batch_size=config.auto_scale_batch_size,
-    callbacks=callbacks,
-    log_every_n_steps=1,
-    enable_checkpointing=True,
-    fast_dev_run=config.fast_dev_run,
-    limit_train_batches=config.limit_train_batches,
-    val_check_interval=config.val_check_interval,
-    accumulate_grad_batches=config.accumulate_grad_batches,
-    default_root_dir=osp.join(os.getcwd(), "exp"),
-)
+    trainer = Trainer(
+        gpus=config.gpu,
+        auto_scale_batch_size=config.auto_scale_batch_size,
+        default_root_dir=osp.join(os.getcwd(), "exp"),
+    )
 
-model = MultiRegression(config)
-dataset_module = ELL_data(config)
+    preds = trainer.predict(model, datamodule=dataset_module, ckpt_path=config.ckpt_path)
 
-if config.tune:
-    trainer.tune(model, datamodule=dataset_module)
-trainer.fit(model, datamodule=dataset_module)
+    raw_predictions = torch.cat(preds, axis=0)
+    y_pred = raw_predictions.detach().cpu().numpy()
+    text_id = dataset_module.predict_set.df['text_id']
+
+    output_df = pd.DataFrame({'text_id': {},
+                            'cohesion': {},
+                            'syntax': {},
+                            'vocabulary': {},
+                            'phraseology': {},
+                            'grammar': {},
+                            'conventions': {}}
+                            )
+
+    output_df["text_id"] = text_id
+
+    for i, label in enumerate(model.labels):
+        output_df[label] = y_pred[:,i]
+
+    create_dir("submissions")
+
+    output_df.to_csv(
+        f"submission.csv",
+        index=False,
+    )
