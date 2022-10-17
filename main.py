@@ -133,9 +133,9 @@ else:
     for i, label in enumerate(model.labels):
         output_df[label] = y_pred[:, i]
 
-    create_dir("submissions")
-
     output_df.to_csv(
         f"submission.csv",
         index=False,
     )
+
+    print("submission.csv written !")
