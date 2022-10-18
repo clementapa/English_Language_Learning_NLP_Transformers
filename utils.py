@@ -25,9 +25,11 @@ def collate_batch(batch):
         targets = {"labels": []}
 
     for b in batch:
-        inputs["input_ids"].append(b[0]["input_ids"])
-        inputs["token_type_ids"].append(b[0]["token_type_ids"])
-        inputs["attention_mask"].append(b[0]["attention_mask"])
+        input = b[0] if with_labels else b
+
+        inputs["input_ids"].append(input["input_ids"])
+        inputs["token_type_ids"].append(input["token_type_ids"])
+        inputs["attention_mask"].append(input["attention_mask"])
         if with_labels:
             targets["labels"].append(b[1]["labels"])
 
