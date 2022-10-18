@@ -35,7 +35,8 @@ class Model(nn.Module):
 
         self.pooler = MeanPooling()
 
-        if layer_norm: self.layer_norm = nn.LayerNorm(num_features)
+        if layer_norm:
+            self.layer_norm = nn.LayerNorm(num_features)
 
         if nb_of_linears != 0:
             temp_num_features = num_features
@@ -54,7 +55,8 @@ class Model(nn.Module):
     def forward(self, inputs):
         outputs = self.features_extractor(**inputs, return_dict=True)
         features = self.pooler(outputs["last_hidden_state"], inputs["attention_mask"])
-        if hasattr(self, "layer_norm"): features = self.layer_norm(features)
+        if hasattr(self, "layer_norm"):
+            features = self.layer_norm(features)
         if hasattr(self, "linears"):
             for layer in self.linears:
                 features = layer(features)
