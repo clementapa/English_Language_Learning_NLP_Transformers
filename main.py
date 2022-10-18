@@ -66,7 +66,7 @@ if not config.test:
     wandb_tags = [
         config.name_model,
         "freezed_backbone" if config.freeze_backbone else "no_freezed_backbone",
-        f"{config.nb_of_linears} linear layers"
+        f"{config.nb_of_linears} linear layers",
     ]
 
     wandb_logger = WandbLogger(
@@ -76,7 +76,7 @@ if not config.test:
         allow_val_change=True,
         log_model="all",
         save_dir=osp.join(os.getcwd(), "exp"),
-        tags=wandb_tags
+        tags=wandb_tags,
     )
 
     save_dir = osp.join(os.getcwd(), "exp", wandb_logger.experiment.name)
@@ -87,9 +87,9 @@ if not config.test:
             save_top_k=2,
             mode="min",
             verbose=True,
-            filename='epoch={epoch}-step={step}-val_mcrmse{val/mcrmse:.2f}',
+            filename="epoch={epoch}-step={step}-val_mcrmse{val/mcrmse:.2f}",
             auto_insert_metric_name=False,
-            dirpath=osp.join(save_dir, 'weights')
+            dirpath=osp.join(save_dir, "weights"),
         ),
         LearningRateMonitor(),
         MetricCallback(),
@@ -112,7 +112,7 @@ if not config.test:
         default_root_dir=save_dir,
         max_epochs=config.max_epochs,
     )
-    
+
     model = MultiRegression(config)
     dataset_module = ELL_data(config)
 
