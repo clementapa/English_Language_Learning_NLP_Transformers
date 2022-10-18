@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser(description="parser option")
 
 # model params
 parser.add_argument("--name_model", default="microsoft/deberta-v3-base", type=str)
-parser.add_argument("--nb_of_linears", default=1, type=int)
+parser.add_argument("--nb_of_linears", default=0, type=int)
 parser.add_argument("--freeze_backbone", default=False)
 parser.add_argument("--save_pretrained", default="pretrained", type=str)
 parser.add_argument("--max_length", default=None, type=int)
