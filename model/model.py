@@ -1,26 +1,10 @@
 from transformers import AutoModel
 import torch.nn as nn
-import torch
 import os.path as osp
-
-
-class MeanPooling(nn.Module):
-    def __init__(self):
-        super(MeanPooling, self).__init__()
-
-    def forward(self, last_hidden_state, attention_mask):
-        input_mask_expanded = (
-            attention_mask.unsqueeze(-1).expand(last_hidden_state.size()).float()
-        )
-        sum_embeddings = torch.sum(last_hidden_state * input_mask_expanded, 1)
-        sum_mask = input_mask_expanded.sum(1)
-        sum_mask = torch.clamp(sum_mask, min=1e-9)
-        mean_embeddings = sum_embeddings / sum_mask
-        return mean_embeddings
-
+from pooling import MeanPooling, MaxPooling, MeanMaxPooling, CLSPooling
 
 class Model(nn.Module):
-    def __init__(self, name_model, nb_of_linears, layer_norm, save_pretrained):
+    def __init__(self, name_model, nb_of_linears, layer_norm, pooling, save_pretrained):
         super(Model, self).__init__()
 
         if osp.isdir(save_pretrained):
@@ -33,7 +17,15 @@ class Model(nn.Module):
             self.features_extractor.dummy_inputs["input_ids"]
         )["last_hidden_state"].shape[-1]
 
-        self.pooler = MeanPooling()
+        if pooling == "MeanPooling":
+            self.pooler = MeanPooling()
+        elif pooling == "MaxPooling":
+            self.pooler = MaxPooling()
+        elif pooling == "MeanMaxPooling":
+            self.pooler = MeanMaxPooling()
+            num_features = num_features*2
+        elif pooling == "CLSPooling":
+            self.pooler = CLSPooling()
 
         if layer_norm:
             self.layer_norm = nn.LayerNorm(num_features)
