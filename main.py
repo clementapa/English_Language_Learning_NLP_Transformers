@@ -80,6 +80,7 @@ if not config.test:
     )
 
     save_dir = osp.join(os.getcwd(), "exp", wandb_logger.experiment.name)
+    create_dir(save_dir)
 
     callbacks = [
         ModelCheckpoint(
