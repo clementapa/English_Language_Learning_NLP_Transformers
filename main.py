@@ -63,24 +63,33 @@ config.save_pretrained = osp.join(config.save_pretrained, config.name_model)
 
 if not config.test:
 
-    create_dir(osp.join(os.getcwd(), "exp", "weights"))
+    wandb_tags = [
+        config.name_model,
+        "freezed_backbone" if config.freeze_backbone else "no_freezed_backbone",
+        f"{config.nb_of_linears} linear layers"
+    ]
 
     wandb_logger = WandbLogger(
         config=config,
         project="ELL",
         entity="clementapa",
         allow_val_change=True,
+        log_model="all",
         save_dir=osp.join(os.getcwd(), "exp"),
+        tags=wandb_tags
     )
+
+    save_dir = osp.join(os.getcwd(), "exp", wandb_logger.experiment.name)
 
     callbacks = [
         ModelCheckpoint(
             monitor="val/mcrmse",
-            dirpath=osp.join(os.getcwd(), "exp", "weights"),  #'/kaggle/working/',
             save_top_k=2,
             mode="min",
             verbose=True,
+            filename='epoch={epoch}-step={step}-val_mcrmse{val/mcrmse:.2f}',
             auto_insert_metric_name=False,
+            dirpath=osp.join(save_dir, 'weights')
         ),
         LearningRateMonitor(),
         MetricCallback(),
@@ -100,10 +109,10 @@ if not config.test:
         limit_train_batches=config.limit_train_batches,
         val_check_interval=config.val_check_interval,
         accumulate_grad_batches=config.accumulate_grad_batches,
-        default_root_dir=osp.join(os.getcwd(), "exp"),
+        default_root_dir=save_dir,
         max_epochs=config.max_epochs,
     )
-
+    
     model = MultiRegression(config)
     dataset_module = ELL_data(config)
 
