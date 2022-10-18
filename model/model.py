@@ -3,6 +3,7 @@ import torch.nn as nn
 import os.path as osp
 from pooling import MeanPooling, MaxPooling, MeanMaxPooling, CLSPooling
 
+
 class Model(nn.Module):
     def __init__(self, name_model, nb_of_linears, layer_norm, pooling, save_pretrained):
         super(Model, self).__init__()
@@ -23,7 +24,7 @@ class Model(nn.Module):
             self.pooler = MaxPooling()
         elif pooling == "MeanMaxPooling":
             self.pooler = MeanMaxPooling()
-            num_features = num_features*2
+            num_features = num_features * 2
         elif pooling == "CLSPooling":
             self.pooler = CLSPooling()
 
