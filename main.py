@@ -71,10 +71,11 @@ if not config.test:
         "freezed_backbone" if config.freeze_backbone else "no_freezed_backbone",
         f"{config.nb_of_linears} linear layers",
         config.loss,
-        config.pooling
+        config.pooling,
     ]
 
-    if config.layer_norm: wandb_tags.append('layer_norm')
+    if config.layer_norm:
+        wandb_tags.append("layer_norm")
 
     wandb_logger = WandbLogger(
         config=config,
