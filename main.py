@@ -22,7 +22,7 @@ parser = argparse.ArgumentParser(description="parser option")
 # model params
 parser.add_argument("--name_model", default="microsoft/deberta-v3-base", type=str)
 parser.add_argument("--nb_of_linears", default=0, type=int)
-parser.add_argument("--freeze_backbone", default=False)
+parser.add_argument("--freeze_backbone", default=False, type=bool)
 parser.add_argument("--save_pretrained", default="pretrained", type=str)
 parser.add_argument("--max_length", default=None, type=int)
 parser.add_argument("--layer_norm", default=False, type=bool)
@@ -37,7 +37,7 @@ parser.add_argument("--T_max", default=1, type=int)
 parser.add_argument("--step_size_scheduler", default=1, type=int)
 parser.add_argument("--weight_decay", default=0, type=int)
 parser.add_argument("--auto_scale_batch_size", default="power")
-parser.add_argument("--accumulate_grad_batches", default=None)
+parser.add_argument("--accumulate_grad_batches", default=None, type=int)
 parser.add_argument("--max_epochs", default=-1, type=int)
 
 # dataset params
