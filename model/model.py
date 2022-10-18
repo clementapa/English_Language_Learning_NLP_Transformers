@@ -1,7 +1,7 @@
 from transformers import AutoModel
 import torch.nn as nn
 import os.path as osp
-from pooling import MeanPooling, MaxPooling, MeanMaxPooling, CLSPooling
+from model.pooling import MeanPooling, MaxPooling, MeanMaxPooling, CLSPooling
 
 class Model(nn.Module):
     def __init__(self, name_model, nb_of_linears, layer_norm, pooling, save_pretrained):
