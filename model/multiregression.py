@@ -59,6 +59,12 @@ class MultiRegression(pl.LightningModule):
                 out_dict["scheduler"] = optim.lr_scheduler.StepLR(
                     out_dict["optimizer"], self.config.step_size_scheduler
                 )
+            elif self.config.scheduler == "ReduceLROnPlateau":
+                out_dict["lr_scheduler"] = {
+                    "scheduler": optim.lr_scheduler.ReduceLROnPlateau(
+                        out_dict["optimizer"], mode="min", patience=3), 
+                    "monitor": "train/loss"
+                    }
             else:
                 raise NotImplementedError(
                     f"{self.config.scheduler} scheduler not supported"
