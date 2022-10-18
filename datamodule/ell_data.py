@@ -72,7 +72,7 @@ class ELL_data(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=True,
-            collate_fn=collate_batch if self.train_set.max_len == None else None
+            collate_fn=collate_batch if self.train_set.max_len == None else None,
         )
         return train
 
@@ -81,7 +81,7 @@ class ELL_data(pl.LightningDataModule):
             self.val_set,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            collate_fn=collate_batch if self.val_set.max_len == None else None
+            collate_fn=collate_batch if self.val_set.max_len == None else None,
         )
         return val
 
@@ -91,6 +91,6 @@ class ELL_data(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=False,
-            collate_fn=collate_batch if self.predict_set.max_len == None else None
+            collate_fn=collate_batch if self.predict_set.max_len == None else None,
         )
         return predict
