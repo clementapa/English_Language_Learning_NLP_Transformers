@@ -27,7 +27,7 @@ parser.add_argument("--save_pretrained", default="pretrained", type=str)
 parser.add_argument("--max_length", default=None, type=int)
 
 # optimization params
-parser.add_argument("--loss", default='SmoothL1Loss', type=str)
+parser.add_argument("--loss", default="SmoothL1Loss", type=str)
 parser.add_argument("--lr", default=0.001, type=float)
 parser.add_argument("--batch_size", default=6, type=int)
 parser.add_argument("--scheduler", default=None, type=str)

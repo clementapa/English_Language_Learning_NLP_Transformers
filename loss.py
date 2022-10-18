@@ -1,8 +1,8 @@
 import torch.nn as nn
 import torch
 
-class MCRMSELoss(nn.Module):
 
+class MCRMSELoss(nn.Module):
     def __init__(self) -> None:
         super().__init__()
 

@@ -4,7 +4,8 @@ import torch.optim as optim
 import pytorch_lightning as pl
 import os.path as osp
 from loss import MCRMSELoss
-import torch.nn as nn 
+import torch.nn as nn
+
 
 class MultiRegression(pl.LightningModule):
     def __init__(self, config):
@@ -20,8 +21,7 @@ class MultiRegression(pl.LightningModule):
         elif config.loss == "SmoothL1Loss":
             self.loss = nn.SmoothL1Loss()
         else:
-            raise NotImplementedError(f'{config.loss} not implemented !')
-
+            raise NotImplementedError(f"{config.loss} not implemented !")
 
         self.model = Model(
             config.name_model,
