@@ -13,8 +13,9 @@ class EssayDataset:
             "grammar",
             "conventions",
         ]
-        self.max_len = tokenizer.model_max_length if max_length==None else max_length
-        if self.max_len>1000000: self.max_len=None
+        self.max_len = tokenizer.model_max_length if max_length == None else max_length
+        if self.max_len > 1000000:
+            self.max_len = None
 
         self.tokenizer = tokenizer
         self.is_test = is_test
@@ -27,8 +28,8 @@ class EssayDataset:
             None,
             add_special_tokens=True,
             max_length=self.max_len,
-            truncation=True if self.max_len!=None else False,
-            padding="max_length" if self.max_len!=None else False,
+            truncation=True if self.max_len != None else False,
+            padding="max_length" if self.max_len != None else False,
         )
 
         inputs = {
