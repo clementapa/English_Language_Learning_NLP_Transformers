@@ -5,7 +5,7 @@ import os.path as osp
 from sklearn.model_selection import train_test_split
 from datamodule.essay_dataset import EssayDataset
 import pandas as pd
-from utils import create_dir
+from utils import create_dir, collate_batch
 
 
 class ELL_data(pl.LightningDataModule):
@@ -72,6 +72,7 @@ class ELL_data(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=True,
+            collate_fn=collate_batch if self.train_set.max_len == None else None
         )
         return train
 
@@ -80,6 +81,7 @@ class ELL_data(pl.LightningDataModule):
             self.val_set,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
+            collate_fn=collate_batch if self.val_set.max_len == None else None
         )
         return val
 
@@ -89,5 +91,6 @@ class ELL_data(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=False,
+            collate_fn=collate_batch if self.predict_set.max_len == None else None
         )
         return predict
