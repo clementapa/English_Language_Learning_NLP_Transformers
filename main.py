@@ -25,6 +25,7 @@ parser.add_argument("--nb_of_linears", default=1, type=int)
 parser.add_argument("--freeze_backbone", default=False)
 parser.add_argument("--save_pretrained", default="pretrained", type=str)
 parser.add_argument("--max_length", default=None, type=int)
+parser.add_argument("--layer_norm", default=False, type=bool)
 
 # optimization params
 parser.add_argument("--loss", default="SmoothL1Loss", type=str)

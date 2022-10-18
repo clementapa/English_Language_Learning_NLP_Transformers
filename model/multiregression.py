@@ -26,6 +26,7 @@ class MultiRegression(pl.LightningModule):
         self.model = Model(
             config.name_model,
             config.nb_of_linears,
+            config.layer_norm,
             osp.join(config.save_pretrained, "model"),
         )
 
