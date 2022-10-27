@@ -5,7 +5,7 @@ from model.pooling import MeanPooling, MaxPooling, MeanMaxPooling, CLSPooling
 
 
 class Model(nn.Module):
-    def __init__(self, name_model, nb_of_linears, layer_norm, pooling, save_pretrained):
+    def __init__(self, name_model, nb_of_linears, layer_norm, pooling, last_layer_reinitialization, save_pretrained):
         super(Model, self).__init__()
 
         if osp.isdir(save_pretrained):
@@ -13,6 +13,17 @@ class Model(nn.Module):
         else:
             self.features_extractor = AutoModel.from_pretrained(name_model)
             self.features_extractor.save_pretrained(save_pretrained)
+
+        if last_layer_reinitialization:
+            for encoder_block in self.features_extractor.base_model.encoder.layer[-1:]:
+                for layer in encoder_block.modules():
+                    if isinstance(layer, nn.Linear):
+                        nn.init.xavier_uniform_(layer.weight.data)
+                        if layer.bias is not None:
+                            nn.init.constant_(layer.bias.data, 0)
+                    elif isinstance(layer, nn.LayerNorm):
+                        nn.init.constant_(layer.weight.data, 1)
+                        nn.init.constant_(layer.bias.data, 0)
 
         num_features = self.features_extractor(
             self.features_extractor.dummy_inputs["input_ids"]

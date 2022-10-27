@@ -29,11 +29,12 @@ parser.add_argument("--save_pretrained", default="pretrained", type=str)
 parser.add_argument("--max_length", default=None, type=int)
 parser.add_argument("--layer_norm", default=False, type=bool)
 parser.add_argument("--pooling", default="MeanPooling", type=str)
+parser.add_argument("--last_layer_reinitialization", default=False, type=bool)
 
 # optimization params
 parser.add_argument("--loss", default="SmoothL1Loss", type=str)
 parser.add_argument("--lr", default=0.001, type=float)
-parser.add_argument("--batch_size", default=6, type=int)
+parser.add_argument("--batch_size", default=4, type=int)
 parser.add_argument("--scheduler", default=None, type=str)
 parser.add_argument("--T_max", default=1, type=int)
 parser.add_argument("--step_size_scheduler", default=1, type=int)

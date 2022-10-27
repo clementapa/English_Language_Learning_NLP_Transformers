@@ -28,6 +28,7 @@ class MultiRegression(pl.LightningModule):
             config.nb_of_linears,
             config.layer_norm,
             config.pooling,
+            config.last_layer_reinitialization,
             osp.join(config.save_pretrained, "model"),
         )
 
