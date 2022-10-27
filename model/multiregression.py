@@ -65,11 +65,11 @@ class MultiRegression(pl.LightningModule):
             )
             if self.config.scheduler != None:
                 if self.config.scheduler == "CosineAnnealingLR":
-                    out_dict["scheduler"] = optim.lr_scheduler.CosineAnnealingLR(
+                    out_dict["lr_scheduler"] = optim.lr_scheduler.CosineAnnealingLR(
                         out_dict["optimizer"], self.config.T_max
                     )
                 elif self.config.scheduler == "StepLR":
-                    out_dict["scheduler"] = optim.lr_scheduler.StepLR(
+                    out_dict["lr_scheduler"] = optim.lr_scheduler.StepLR(
                         out_dict["optimizer"], self.config.step_size_scheduler
                     )
                 elif self.config.scheduler == "ReduceLROnPlateau":
@@ -94,13 +94,13 @@ class MultiRegression(pl.LightningModule):
                 eps=self.config.adam_epsilon,
             )
             if self.config.scheduler == "linear":
-                out_dict["scheduler"] = get_linear_schedule_with_warmup(
+                out_dict["lr_scheduler"] = get_linear_schedule_with_warmup(
                     out_dict["optimizer"],
                     num_warmup_steps=0,
                     num_training_steps=self.config.num_train_steps,
                 )
             else:
-                out_dict["scheduler"] = get_cosine_schedule_with_warmup(
+                out_dict["lr_scheduler"] = get_cosine_schedule_with_warmup(
                     out_dict["optimizer"],
                     num_warmup_steps=0,
                     num_training_steps=self.config.num_train_steps,
