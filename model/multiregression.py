@@ -4,7 +4,11 @@ import pytorch_lightning as pl
 import torch.nn as nn
 import torch.optim as optim
 from loss import MCRMSELoss
-from transformers import AdamW, get_cosine_schedule_with_warmup, get_linear_schedule_with_warmup
+from transformers import (
+    AdamW,
+    get_cosine_schedule_with_warmup,
+    get_linear_schedule_with_warmup,
+)
 
 from model.model import Model
 
