@@ -14,6 +14,7 @@ class Model(nn.Module):
         layer_norm,
         pooling,
         last_layer_reinitialization,
+        gradient_checkpointing,
         save_pretrained,
     ):
         super(Model, self).__init__()
@@ -35,7 +36,7 @@ class Model(nn.Module):
                 name_model, **deactivate_dropout
             )
             self.features_extractor.save_pretrained(save_pretrained)
-
+        
         if last_layer_reinitialization:
             for encoder_block in self.features_extractor.base_model.encoder.layer[-1:]:
                 for layer in encoder_block.modules():
@@ -46,6 +47,9 @@ class Model(nn.Module):
                     elif isinstance(layer, nn.LayerNorm):
                         nn.init.constant_(layer.weight.data, 1)
                         nn.init.constant_(layer.bias.data, 0)
+
+        if gradient_checkpointing:
+            self.features_extractor.gradient_checkpointing_enable()
 
         num_features = self.features_extractor(
             self.features_extractor.dummy_inputs["input_ids"]

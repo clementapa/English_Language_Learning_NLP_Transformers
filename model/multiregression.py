@@ -36,6 +36,7 @@ class MultiRegression(pl.LightningModule):
             config.layer_norm,
             config.pooling,
             config.last_layer_reinitialization,
+            config.gradient_checkpointing,
             osp.join(config.save_pretrained, "model"),
         )
 

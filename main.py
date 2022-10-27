@@ -36,6 +36,7 @@ parser.add_argument("--max_length", default=None, type=int)
 parser.add_argument("--layer_norm", default=False, type=bool)
 parser.add_argument("--pooling", default="MeanPooling", type=str)
 parser.add_argument("--last_layer_reinitialization", default=False, type=bool)
+parser.add_argument("--gradient_checkpointing", default=True, type=bool)
 
 # optimization params
 parser.add_argument("--loss", default="SmoothL1Loss", type=str)
