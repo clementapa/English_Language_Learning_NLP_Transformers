@@ -24,7 +24,7 @@ parser = argparse.ArgumentParser(description="parser option")
 # model params
 parser.add_argument("--name_model", default="microsoft/deberta-v3-base", type=str)
 parser.add_argument("--nb_of_linears", default=0, type=int)
-parser.add_argument("--freeze_backbone", default=True, type=bool)
+parser.add_argument("--freeze_backbone", default=False, type=bool)
 parser.add_argument("--save_pretrained", default="pretrained", type=str)
 parser.add_argument("--max_length", default=None, type=int)
 parser.add_argument("--layer_norm", default=False, type=bool)
@@ -52,7 +52,7 @@ parser.add_argument("--random_state", default=42, type=int)
 
 # trainer params
 parser.add_argument("--gpu", default=0, type=int)
-parser.add_argument("--fast_dev_run", default=True, type=bool)
+parser.add_argument("--fast_dev_run", default=False, type=bool)
 parser.add_argument("--limit_train_batches", default=1.0, type=float)
 parser.add_argument("--val_check_interval", default=1.0, type=float)
 parser.add_argument("--kaggle", default=False, type=bool)
