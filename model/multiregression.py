@@ -98,7 +98,7 @@ class MultiRegression(pl.LightningModule):
                     out_dict["optimizer"],
                     num_warmup_steps=0,
                     num_training_steps=self.config.num_train_steps,
-            )
+                )
             else:
                 out_dict["scheduler"] = get_cosine_schedule_with_warmup(
                     out_dict["optimizer"],

@@ -138,7 +138,9 @@ if not config.test:
 
         dataset_module = ELL_data(config)
         dataset_module.prepare_data()
-        config.num_train_steps = int(len(dataset_module.train_set) / config.batch_size * config.max_epochs)
+        config.num_train_steps = int(
+            len(dataset_module.train_set) / config.batch_size * config.max_epochs
+        )
         model = MultiRegression(config)
 
         if config.tune:
@@ -153,7 +155,9 @@ if not config.test:
 
             dataset_module = ELL_data(config, fold=fold)
             dataset_module.prepare_data()
-            config.num_train_steps = int(len(dataset_module.train_set) / config.batch_size * config.max_epochs)
+            config.num_train_steps = int(
+                len(dataset_module.train_set) / config.batch_size * config.max_epochs
+            )
             model = MultiRegression(config)
 
             wandb_logger = WandbLogger(
