@@ -1,10 +1,12 @@
-from model.model import Model
-import torch
-import torch.optim as optim
-import pytorch_lightning as pl
 import os.path as osp
-from loss import MCRMSELoss
+
+import pytorch_lightning as pl
 import torch.nn as nn
+import torch.optim as optim
+from loss import MCRMSELoss
+from transformers import AdamW, get_cosine_schedule_with_warmup
+
+from model.model import Model
 
 
 class MultiRegression(pl.LightningModule):
@@ -49,31 +51,90 @@ class MultiRegression(pl.LightningModule):
 
     def configure_optimizers(self):
         """defines model optimizer"""
-        out_dict = {}
-        out_dict["optimizer"] = optim.Adam(
-            self.model.parameters(), lr=self.lr, weight_decay=self.config.weight_decay
-        )
-        if self.config.scheduler != None:
-            if self.config.scheduler == "CosineAnnealingLR":
-                out_dict["scheduler"] = optim.lr_scheduler.CosineAnnealingLR(
-                    out_dict["optimizer"], self.config.T_max
-                )
-            elif self.config.scheduler == "StepLR":
-                out_dict["scheduler"] = optim.lr_scheduler.StepLR(
-                    out_dict["optimizer"], self.config.step_size_scheduler
-                )
-            elif self.config.scheduler == "ReduceLROnPlateau":
-                out_dict["lr_scheduler"] = {
-                    "scheduler": optim.lr_scheduler.ReduceLROnPlateau(
-                        out_dict["optimizer"], mode="min", patience=3
-                    ),
-                    "monitor": "train/loss",
-                }
-            else:
-                raise NotImplementedError(
-                    f"{self.config.scheduler} scheduler not supported"
-                )
+        if not self.config.layer_wise_lr_decay:
+            out_dict = {}
+            out_dict["optimizer"] = optim.Adam(
+                self.model.parameters(), lr=self.lr, weight_decay=self.config.weight_decay
+            )
+            if self.config.scheduler != None:
+                if self.config.scheduler == "CosineAnnealingLR":
+                    out_dict["scheduler"] = optim.lr_scheduler.CosineAnnealingLR(
+                        out_dict["optimizer"], self.config.T_max
+                    )
+                elif self.config.scheduler == "StepLR":
+                    out_dict["scheduler"] = optim.lr_scheduler.StepLR(
+                        out_dict["optimizer"], self.config.step_size_scheduler
+                    )
+                elif self.config.scheduler == "ReduceLROnPlateau":
+                    out_dict["lr_scheduler"] = {
+                        "scheduler": optim.lr_scheduler.ReduceLROnPlateau(
+                            out_dict["optimizer"], mode="min", patience=3
+                        ),
+                        "monitor": "train/loss",
+                    }
+                else:
+                    raise NotImplementedError(
+                        f"{self.config.scheduler} scheduler not supported"
+                    )
+        else:
+            out_dict = {}
+            grouped_optimizer_params = self.get_optimizer_grouped_parameters(
+                self.model, 
+                self.lr, self.config.weight_decay, 
+                self.config.LLDR
+            )
+            out_dict['optimizer'] = AdamW(
+                grouped_optimizer_params,
+                lr=self.lr,
+                eps=self.config.adam_epsilon,
+                correct_bias=not self.config.use_bertadam
+            )
+            out_dict['scheduler'] = get_cosine_schedule_with_warmup(
+                out_dict['optimizer'],
+                num_warmup_steps=0,
+                num_training_steps=self.config.max_epochs
+            )
+
         return out_dict
+
+    def get_optimizer_grouped_parameters(
+        self,
+        model, 
+        learning_rate, weight_decay, 
+        layerwise_learning_rate_decay
+    ):
+        '''
+            https://www.kaggle.com/code/rhtsingh/on-stability-of-few-sample-transformer-fine-tuning?scriptVersionId=67176591&cellId=26
+        '''
+        no_decay = ["bias", "LayerNorm.weight"]
+        # initialize lr for task specific layer
+        optimizer_grouped_parameters = [
+            {
+                "params": [p for n, p in model.named_parameters() if "cls" in n or "pooler" in n or "linears" in n or "layer_norm" in n],
+                "weight_decay": 0.0,
+                "lr": learning_rate,
+            },
+        ]
+        # initialize lrs for every layer
+        num_layers = model.features_extractor.config.num_hidden_layers
+        layers = [model.features_extractor.base_model.embeddings] + list(model.features_extractor.base_model.encoder.layer)
+        layers.reverse()
+        lr = learning_rate
+        for layer in layers:
+            lr *= layerwise_learning_rate_decay
+            optimizer_grouped_parameters += [
+                {
+                    "params": [p for n, p in layer.named_parameters() if not any(nd in n for nd in no_decay)],
+                    "weight_decay": weight_decay,
+                    "lr": lr,
+                },
+                {
+                    "params": [p for n, p in layer.named_parameters() if any(nd in n for nd in no_decay)],
+                    "weight_decay": 0.0,
+                    "lr": lr,
+                },
+            ]
+        return optimizer_grouped_parameters
 
     def forward(self, x):
         outputs = self.model(x)

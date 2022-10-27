@@ -1,7 +1,9 @@
-from transformers import AutoModel
-import torch.nn as nn
 import os.path as osp
-from model.pooling import MeanPooling, MaxPooling, MeanMaxPooling, CLSPooling
+
+import torch.nn as nn
+from transformers import AutoModel
+
+from model.pooling import CLSPooling, MaxPooling, MeanMaxPooling, MeanPooling
 
 
 class Model(nn.Module):

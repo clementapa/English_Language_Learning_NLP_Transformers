@@ -33,15 +33,19 @@ parser.add_argument("--last_layer_reinitialization", default=False, type=bool)
 
 # optimization params
 parser.add_argument("--loss", default="SmoothL1Loss", type=str)
-parser.add_argument("--lr", default=0.001, type=float)
+parser.add_argument("--lr", default=5e-5, type=float)
 parser.add_argument("--batch_size", default=4, type=int)
 parser.add_argument("--scheduler", default=None, type=str)
 parser.add_argument("--T_max", default=1, type=int)
 parser.add_argument("--step_size_scheduler", default=1, type=int)
-parser.add_argument("--weight_decay", default=0, type=int)
+parser.add_argument("--weight_decay", default=0.01, type=int)
 parser.add_argument("--auto_scale_batch_size", default="power")
 parser.add_argument("--accumulate_grad_batches", default=None, type=int)
 parser.add_argument("--max_epochs", default=-1, type=int)
+parser.add_argument("--layer_wise_lr_decay", default=True, type=bool)
+parser.add_argument("--LLDR", default=0.9, type=float)
+parser.add_argument("--adam_epsilon", default=1e-6, type=float)
+parser.add_argument("--use_bertadam", default=False, type=bool)
 
 # dataset params
 parser.add_argument("--num_workers", default=4, type=int)
