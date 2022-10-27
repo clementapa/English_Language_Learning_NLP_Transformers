@@ -18,10 +18,18 @@ class Model(nn.Module):
     ):
         super(Model, self).__init__()
 
+        # Dropout is bad for regression tasks
+        # https://www.kaggle.com/competitions/commonlitreadabilityprize/discussion/260729
+        deactivate_dropout = {
+            "attention_probs_dropout_prob": 0,
+            "hidden_dropout_prob": 0,
+            "pooler_dropout": 0
+        }
+
         if osp.isdir(save_pretrained):
-            self.features_extractor = AutoModel.from_pretrained(save_pretrained)
+            self.features_extractor = AutoModel.from_pretrained(save_pretrained, **deactivate_dropout)
         else:
-            self.features_extractor = AutoModel.from_pretrained(name_model)
+            self.features_extractor = AutoModel.from_pretrained(name_model, **deactivate_dropout)
             self.features_extractor.save_pretrained(save_pretrained)
 
         if last_layer_reinitialization:
