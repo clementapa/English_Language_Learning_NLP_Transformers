@@ -25,6 +25,8 @@ class MultiRegression(pl.LightningModule):
             self.loss = MCRMSELoss()
         elif config.loss == "SmoothL1Loss":
             self.loss = nn.SmoothL1Loss()
+        elif config.loss == "HuberLoss":
+            self.loss = nn.HuberLoss()
         else:
             raise NotImplementedError(f"{config.loss} not implemented !")
 
