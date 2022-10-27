@@ -41,7 +41,7 @@ parser.add_argument("--step_size_scheduler", default=1, type=int)
 parser.add_argument("--weight_decay", default=0.01, type=int)
 parser.add_argument("--auto_scale_batch_size", default="power")
 parser.add_argument("--accumulate_grad_batches", default=None, type=int)
-parser.add_argument("--max_epochs", default=-1, type=int)
+parser.add_argument("--max_epochs", default=999, type=int)
 parser.add_argument("--layer_wise_lr_decay", default=True, type=bool)
 parser.add_argument("--LLDR", default=0.9, type=float)
 parser.add_argument("--adam_epsilon", default=1e-6, type=float)
@@ -136,8 +136,10 @@ if not config.test:
             max_epochs=config.max_epochs,
         )
 
-        model = MultiRegression(config)
         dataset_module = ELL_data(config)
+        dataset_module.prepare_data()
+        config.num_train_steps = int(len(dataset_module.train_set) / config.batch_size * config.max_epochs)
+        model = MultiRegression(config)
 
         if config.tune:
             trainer.tune(model, datamodule=dataset_module)
@@ -150,6 +152,8 @@ if not config.test:
             print(f"\n-----------FOLD {fold} ------------")
 
             dataset_module = ELL_data(config, fold=fold)
+            dataset_module.prepare_data()
+            config.num_train_steps = int(len(dataset_module.train_set) / config.batch_size * config.max_epochs)
             model = MultiRegression(config)
 
             wandb_logger = WandbLogger(
