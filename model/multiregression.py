@@ -4,7 +4,11 @@ import pytorch_lightning as pl
 import torch.nn as nn
 import torch.optim as optim
 from loss import MCRMSELoss
-from transformers import AdamW, get_cosine_schedule_with_warmup, get_linear_schedule_with_warmup
+from transformers import (
+    AdamW,
+    get_cosine_schedule_with_warmup,
+    get_linear_schedule_with_warmup,
+)
 
 from model.model import Model
 
@@ -94,7 +98,7 @@ class MultiRegression(pl.LightningModule):
                     out_dict["optimizer"],
                     num_warmup_steps=0,
                     num_training_steps=self.config.max_epochs,
-            )
+                )
             else:
                 out_dict["scheduler"] = get_cosine_schedule_with_warmup(
                     out_dict["optimizer"],
