@@ -59,11 +59,14 @@ class MultiRegression(pl.LightningModule):
         """defines model optimizer"""
         if not self.config.layer_wise_lr_decay:
             out_dict = {}
+
+            model_parameters = filter(lambda parameter: parameter.requires_grad, self.model.parameters())
             out_dict["optimizer"] = optim.Adam(
-                self.model.parameters(),
+                model_parameters,
                 lr=self.lr,
                 weight_decay=self.config.weight_decay,
             )
+
             if self.config.scheduler != None:
                 if self.config.scheduler == "CosineAnnealingLR":
                     out_dict["lr_scheduler"] = optim.lr_scheduler.CosineAnnealingLR(
