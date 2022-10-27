@@ -5,7 +5,6 @@ import torch.nn as nn
 import torch.optim as optim
 from loss import MCRMSELoss
 from transformers import (
-    AdamW,
     get_cosine_schedule_with_warmup,
     get_linear_schedule_with_warmup,
 )
@@ -87,11 +86,10 @@ class MultiRegression(pl.LightningModule):
             grouped_optimizer_params = self.get_optimizer_grouped_parameters(
                 self.model, self.lr, self.config.weight_decay, self.config.LLDR
             )
-            out_dict["optimizer"] = AdamW(
+            out_dict["optimizer"] = optim.AdamW(
                 grouped_optimizer_params,
                 lr=self.lr,
                 eps=self.config.adam_epsilon,
-                correct_bias=not self.config.use_bertadam,
             )
             if self.config.scheduler == "linear":
                 out_dict["scheduler"] = get_linear_schedule_with_warmup(

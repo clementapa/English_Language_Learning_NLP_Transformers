@@ -45,7 +45,6 @@ parser.add_argument("--max_epochs", default=999, type=int)
 parser.add_argument("--layer_wise_lr_decay", default=True, type=bool)
 parser.add_argument("--LLDR", default=0.9, type=float)
 parser.add_argument("--adam_epsilon", default=1e-6, type=float)
-parser.add_argument("--use_bertadam", default=False, type=bool)
 
 # dataset params
 parser.add_argument("--num_workers", default=4, type=int)
