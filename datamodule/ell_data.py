@@ -22,9 +22,9 @@ class ELL_data(pl.LightningDataModule):
 
         save_pretrained_tokenizer = osp.join(config.save_pretrained, "tokenizer")
         if osp.isdir(save_pretrained_tokenizer):
-            self.tokenizer = AutoTokenizer.from_pretrained(save_pretrained_tokenizer)
+            self.tokenizer = AutoTokenizer.from_pretrained(save_pretrained_tokenizer, use_fast=True)
         else:
-            self.tokenizer = AutoTokenizer.from_pretrained(config.name_model)
+            self.tokenizer = AutoTokenizer.from_pretrained(config.name_model, use_fast=True)
             self.tokenizer.save_pretrained(save_pretrained_tokenizer)
 
         self.fold = fold
