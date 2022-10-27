@@ -5,7 +5,15 @@ from model.pooling import MeanPooling, MaxPooling, MeanMaxPooling, CLSPooling
 
 
 class Model(nn.Module):
-    def __init__(self, name_model, nb_of_linears, layer_norm, pooling, last_layer_reinitialization, save_pretrained):
+    def __init__(
+        self,
+        name_model,
+        nb_of_linears,
+        layer_norm,
+        pooling,
+        last_layer_reinitialization,
+        save_pretrained,
+    ):
         super(Model, self).__init__()
 
         if osp.isdir(save_pretrained):
