@@ -8,6 +8,7 @@ from datamodule.essay_dataset import EssayDataset
 import pandas as pd
 from utils import create_dir, collate_batch
 
+
 class ELL_data(pl.LightningDataModule):
     def __init__(self, config, fold=None):
         super(ELL_data, self).__init__()
@@ -67,6 +68,7 @@ class ELL_data(pl.LightningDataModule):
                 )
                 if not osp.isdir(data_dir):
                     from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
+
                     dataset = pd.read_csv(
                         osp.join(
                             self.root,
