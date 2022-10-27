@@ -7,8 +7,6 @@ from sklearn.model_selection import train_test_split
 from datamodule.essay_dataset import EssayDataset
 import pandas as pd
 from utils import create_dir, collate_batch
-from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
-
 
 class ELL_data(pl.LightningDataModule):
     def __init__(self, config, fold=None):
@@ -68,6 +66,7 @@ class ELL_data(pl.LightningDataModule):
                     "assets", f"dataset_{self.config.N_fold}_MultilabelStratifiedKFold"
                 )
                 if not osp.isdir(data_dir):
+                    from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
                     dataset = pd.read_csv(
                         osp.join(
                             self.root,
