@@ -17,13 +17,14 @@ from model.multiregression import MultiRegression
 from utils import create_dir
 import pandas as pd
 import numpy as np
+import wandb
 
 parser = argparse.ArgumentParser(description="parser option")
 
 # model params
 parser.add_argument("--name_model", default="microsoft/deberta-v3-base", type=str)
 parser.add_argument("--nb_of_linears", default=0, type=int)
-parser.add_argument("--freeze_backbone", default=False, type=bool)
+parser.add_argument("--freeze_backbone", default=True, type=bool)
 parser.add_argument("--save_pretrained", default="pretrained", type=str)
 parser.add_argument("--max_length", default=None, type=int)
 parser.add_argument("--layer_norm", default=False, type=bool)
@@ -43,12 +44,15 @@ parser.add_argument("--max_epochs", default=-1, type=int)
 
 # dataset params
 parser.add_argument("--num_workers", default=4, type=int)
-parser.add_argument("--validation_split", default=0.1, type=float)
 parser.add_argument("--root", default=osp.join(os.getcwd(), "assets"), type=str)
+parser.add_argument("--split_dataset", default='normal', type=str) # normal or MultilabelStratifiedKFold
+parser.add_argument("--validation_split", default=0.1, type=float)
+parser.add_argument("--N_fold", default=5, type=int)
+parser.add_argument("--random_state", default=42, type=int)
 
 # trainer params
 parser.add_argument("--gpu", default=0, type=int)
-parser.add_argument("--fast_dev_run", default=False, type=bool)
+parser.add_argument("--fast_dev_run", default=True, type=bool)
 parser.add_argument("--limit_train_batches", default=1.0, type=float)
 parser.add_argument("--val_check_interval", default=1.0, type=float)
 parser.add_argument("--kaggle", default=False, type=bool)
@@ -77,59 +81,120 @@ if not config.test:
 
     if config.layer_norm:
         wandb_tags.append("layer_norm")
+    
+    if config.split_dataset == "normal":
+        wandb_logger = WandbLogger(
+            config=config,
+            project="ELL",
+            entity="clementapa",
+            allow_val_change=True,
+            log_model="all",
+            save_dir=osp.join(os.getcwd(), "exp"),
+            tags=wandb_tags,
+        )
 
-    wandb_logger = WandbLogger(
-        config=config,
-        project="ELL",
-        entity="clementapa",
-        allow_val_change=True,
-        log_model="all",
-        save_dir=osp.join(os.getcwd(), "exp"),
-        tags=wandb_tags,
-    )
+        save_dir = osp.join(os.getcwd(), "exp", wandb_logger.experiment.name)
+        create_dir(save_dir)
 
-    save_dir = osp.join(os.getcwd(), "exp", wandb_logger.experiment.name)
-    create_dir(save_dir)
+        callbacks = [
+            ModelCheckpoint(
+                monitor="val/mcrmse",
+                save_top_k=2,
+                mode="min",
+                verbose=True,
+                filename="epoch={epoch}-step={step}-val_mcrmse{val/mcrmse:.2f}",
+                auto_insert_metric_name=False,
+                dirpath=osp.join(save_dir, "weights"),
+            ),
+            LearningRateMonitor(),
+            MetricCallback(),
+        ]
 
-    callbacks = [
-        ModelCheckpoint(
-            monitor="val/mcrmse",
-            save_top_k=2,
-            mode="min",
-            verbose=True,
-            filename="epoch={epoch}-step={step}-val_mcrmse{val/mcrmse:.2f}",
-            auto_insert_metric_name=False,
-            dirpath=osp.join(save_dir, "weights"),
-        ),
-        LearningRateMonitor(),
-        MetricCallback(),
-    ]
+        if not config.kaggle:
+            callbacks += [RichProgressBar()]
 
-    if not config.kaggle:
-        callbacks += [RichProgressBar()]
+        trainer = Trainer(
+            logger=wandb_logger,
+            gpus=config.gpu,
+            auto_scale_batch_size=config.auto_scale_batch_size,
+            callbacks=callbacks,
+            log_every_n_steps=1,
+            enable_checkpointing=True,
+            fast_dev_run=config.fast_dev_run,
+            limit_train_batches=config.limit_train_batches,
+            val_check_interval=config.val_check_interval,
+            accumulate_grad_batches=config.accumulate_grad_batches,
+            default_root_dir=save_dir,
+            max_epochs=config.max_epochs,
+        )
 
-    trainer = Trainer(
-        logger=wandb_logger,
-        gpus=config.gpu,
-        auto_scale_batch_size=config.auto_scale_batch_size,
-        callbacks=callbacks,
-        log_every_n_steps=1,
-        enable_checkpointing=True,
-        fast_dev_run=config.fast_dev_run,
-        limit_train_batches=config.limit_train_batches,
-        val_check_interval=config.val_check_interval,
-        accumulate_grad_batches=config.accumulate_grad_batches,
-        default_root_dir=save_dir,
-        max_epochs=config.max_epochs,
-    )
+        model = MultiRegression(config)
+        dataset_module = ELL_data(config)
 
-    model = MultiRegression(config)
-    dataset_module = ELL_data(config)
+        if config.tune:
+            trainer.tune(model, datamodule=dataset_module)
 
-    if config.tune:
-        trainer.tune(model, datamodule=dataset_module)
-    trainer.fit(model, datamodule=dataset_module)
+        trainer.fit(model, datamodule=dataset_module)
 
+    elif config.split_dataset=="MultilabelStratifiedKFold":
+        
+        for fold in range(config.N_fold):
+            print(f'\n-----------FOLD {fold} ------------')
+
+            dataset_module = ELL_data(config, fold=fold)
+            model = MultiRegression(config)
+
+            wandb_logger = WandbLogger(
+                config=config,
+                project="ELL",
+                entity="clementapa",
+                allow_val_change=True,
+                log_model="all",
+                save_dir=osp.join(os.getcwd(), "exp", f"Fold-{fold}"),
+                tags=wandb_tags + [f"Fold-{fold}"],
+                name=f"Fold-{fold}"
+            )
+
+            save_dir = osp.join(os.getcwd(), "exp", wandb_logger.experiment.name)
+            create_dir(save_dir)
+
+            callbacks = [
+                ModelCheckpoint(
+                    monitor="val/mcrmse",
+                    save_top_k=2,
+                    mode="min",
+                    verbose=True,
+                    filename="epoch={epoch}-step={step}-val_mcrmse{val/mcrmse:.2f}-fold{fold}",
+                    auto_insert_metric_name=False,
+                    dirpath=osp.join(save_dir, "weights", f"Fold-{fold}"),
+                ),
+                LearningRateMonitor(),
+                MetricCallback(),
+            ]
+
+            if not config.kaggle:
+                callbacks += [RichProgressBar()]
+
+            trainer = Trainer(
+                logger=wandb_logger,
+                gpus=config.gpu,
+                auto_scale_batch_size=config.auto_scale_batch_size,
+                callbacks=callbacks,
+                log_every_n_steps=1,
+                enable_checkpointing=True,
+                fast_dev_run=config.fast_dev_run,
+                limit_train_batches=config.limit_train_batches,
+                val_check_interval=config.val_check_interval,
+                accumulate_grad_batches=config.accumulate_grad_batches,
+                default_root_dir=save_dir,
+                max_epochs=config.max_epochs,
+            )
+
+            if config.tune:
+                trainer.tune(model, datamodule=dataset_module)
+
+            trainer.fit(model, datamodule=dataset_module)
+            wandb.finish()
 else:
     model = MultiRegression(config)
     dataset_module = ELL_data(config)
