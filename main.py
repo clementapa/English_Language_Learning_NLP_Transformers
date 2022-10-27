@@ -68,6 +68,7 @@ parser.add_argument("--tune", default=False, type=bool)
 # inference params
 parser.add_argument("--test", default=False)
 parser.add_argument("--ckpt_path", default="exp/weights/charmed-pond-48.ckpt", type=str)
+parser.add_argument("--name_csv_submission", default="submission.csv", type=str)
 
 config = parser.parse_args()
 
@@ -239,8 +240,8 @@ else:
         output_df[label] = y_pred[:, i]
 
     output_df.to_csv(
-        f"submission.csv",
+        config.name_csv_submission,
         index=False,
     )
 
-    print("submission.csv written !")
+    print(f"{config.name_csv_submission} written !")
