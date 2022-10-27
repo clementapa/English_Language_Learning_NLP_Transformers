@@ -45,7 +45,7 @@ parser.add_argument("--weight_decay", default=0.01, type=int)
 parser.add_argument("--auto_scale_batch_size", default="power")
 parser.add_argument("--accumulate_grad_batches", default=None, type=int)
 parser.add_argument("--max_epochs", default=999, type=int)
-parser.add_argument("--layer_wise_lr_decay", default=True, type=bool)
+parser.add_argument("--layer_wise_lr_decay", default=False, type=bool)
 parser.add_argument("--LLDR", default=0.9, type=float)
 parser.add_argument("--adam_epsilon", default=1e-6, type=float)
 
