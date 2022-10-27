@@ -36,7 +36,7 @@ class Model(nn.Module):
                 name_model, **deactivate_dropout
             )
             self.features_extractor.save_pretrained(save_pretrained)
-        
+
         if last_layer_reinitialization:
             for encoder_block in self.features_extractor.base_model.encoder.layer[-1:]:
                 for layer in encoder_block.modules():
