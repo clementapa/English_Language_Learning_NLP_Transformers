@@ -16,6 +16,7 @@ from datamodule.ell_data import ELL_data
 from model.multiregression import MultiRegression
 from utils import create_dir
 import pandas as pd
+import numpy as np
 
 parser = argparse.ArgumentParser(description="parser option")
 
@@ -145,6 +146,7 @@ else:
 
     raw_predictions = torch.cat(preds, axis=0)
     y_pred = raw_predictions.detach().cpu().numpy()
+    y_pred = np.clip(y_pred, 1, 5)
     text_id = dataset_module.predict_set.df["text_id"]
 
     output_df = pd.DataFrame(
