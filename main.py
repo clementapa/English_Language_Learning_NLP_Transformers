@@ -2,22 +2,25 @@ import argparse
 import os
 import os.path as osp
 
-from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import (
-    LearningRateMonitor,
-    ModelCheckpoint,
-    RichProgressBar,
-)
-from pytorch_lightning.loggers import WandbLogger
+import numpy as np
+import pandas as pd
+import pytorch_lightning
 import torch
+import transformers
+import wandb
+from pytorch_lightning import Trainer
+from pytorch_lightning.callbacks import (LearningRateMonitor, ModelCheckpoint,
+                                         RichProgressBar)
+from pytorch_lightning.loggers import WandbLogger
 
 from callbacks import MetricCallback
 from datamodule.ell_data import ELL_data
 from model.multiregression import MultiRegression
 from utils import create_dir
-import pandas as pd
-import numpy as np
-import wandb
+
+print(f'transformers version: {transformers.__version__}')
+print(f'pytorch_lightning: {pytorch_lightning.__version__}')
+print(f'torch: {torch.__version__}')
 
 parser = argparse.ArgumentParser(description="parser option")
 
