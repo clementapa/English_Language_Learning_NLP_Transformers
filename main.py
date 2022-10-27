@@ -45,7 +45,9 @@ parser.add_argument("--max_epochs", default=-1, type=int)
 # dataset params
 parser.add_argument("--num_workers", default=4, type=int)
 parser.add_argument("--root", default=osp.join(os.getcwd(), "assets"), type=str)
-parser.add_argument("--split_dataset", default='normal', type=str) # normal or MultilabelStratifiedKFold
+parser.add_argument(
+    "--split_dataset", default="normal", type=str
+)  # normal or MultilabelStratifiedKFold
 parser.add_argument("--validation_split", default=0.1, type=float)
 parser.add_argument("--N_fold", default=5, type=int)
 parser.add_argument("--random_state", default=42, type=int)
@@ -81,7 +83,7 @@ if not config.test:
 
     if config.layer_norm:
         wandb_tags.append("layer_norm")
-    
+
     if config.split_dataset == "normal":
         wandb_logger = WandbLogger(
             config=config,
@@ -136,10 +138,10 @@ if not config.test:
 
         trainer.fit(model, datamodule=dataset_module)
 
-    elif config.split_dataset=="MultilabelStratifiedKFold":
-        
+    elif config.split_dataset == "MultilabelStratifiedKFold":
+
         for fold in range(config.N_fold):
-            print(f'\n-----------FOLD {fold} ------------')
+            print(f"\n-----------FOLD {fold} ------------")
 
             dataset_module = ELL_data(config, fold=fold)
             model = MultiRegression(config)
@@ -152,7 +154,7 @@ if not config.test:
                 log_model="all",
                 save_dir=osp.join(os.getcwd(), "exp", f"Fold-{fold}"),
                 tags=wandb_tags + [f"Fold-{fold}"],
-                name=f"Fold-{fold}"
+                name=f"Fold-{fold}",
             )
 
             save_dir = osp.join(os.getcwd(), "exp", wandb_logger.experiment.name)

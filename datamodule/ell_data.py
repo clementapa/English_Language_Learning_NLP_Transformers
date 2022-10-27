@@ -27,7 +27,7 @@ class ELL_data(pl.LightningDataModule):
         else:
             self.tokenizer = AutoTokenizer.from_pretrained(config.name_model)
             self.tokenizer.save_pretrained(save_pretrained_tokenizer)
-        
+
         self.fold = fold
 
         self.labels = [
@@ -41,16 +41,21 @@ class ELL_data(pl.LightningDataModule):
 
     def prepare_data(self) -> None:
         if not self.config.test:
-            if self.config.split_dataset=="normal":
-                data_dir = osp.join("assets", f"dataset_train_val_{self.validation_split}")
+            if self.config.split_dataset == "normal":
+                data_dir = osp.join(
+                    "assets", f"dataset_train_val_{self.validation_split}"
+                )
                 if not osp.isdir(data_dir):
                     dataset = pd.read_csv(
                         osp.join(
-                            self.root, "feedback-prize-english-language-learning/train.csv"
+                            self.root,
+                            "feedback-prize-english-language-learning/train.csv",
                         )
                     )
                     self.train_set, self.val_set = train_test_split(
-                        dataset, test_size=self.validation_split, random_state=self.config.random_state
+                        dataset,
+                        test_size=self.validation_split,
+                        random_state=self.config.random_state,
                     )
                     create_dir(data_dir)
                     self.train_set.to_csv(osp.join(data_dir, "train.csv"), index=False)
@@ -58,31 +63,50 @@ class ELL_data(pl.LightningDataModule):
                 else:
                     self.train_set = pd.read_csv(osp.join(data_dir, "train.csv"))
                     self.val_set = pd.read_csv(osp.join(data_dir, "val.csv"))
-            elif self.config.split_dataset=="MultilabelStratifiedKFold":
-                data_dir = osp.join("assets", f"dataset_{self.config.N_fold}_MultilabelStratifiedKFold")
+            elif self.config.split_dataset == "MultilabelStratifiedKFold":
+                data_dir = osp.join(
+                    "assets", f"dataset_{self.config.N_fold}_MultilabelStratifiedKFold"
+                )
                 if not osp.isdir(data_dir):
                     dataset = pd.read_csv(
                         osp.join(
-                            self.root, "feedback-prize-english-language-learning/train.csv"
+                            self.root,
+                            "feedback-prize-english-language-learning/train.csv",
                         )
                     )
-                    skf = MultilabelStratifiedKFold(n_splits=self.config.N_fold, shuffle=True, random_state=self.config.random_state)
-                    for n, (train_index, val_index) in enumerate(skf.split(dataset, dataset[self.labels])):
-                        dataset.loc[val_index, 'fold'] = int(n)
-                    dataset['fold'] = dataset['fold'].astype(int)
-                    print(dataset['fold'].value_counts())
+                    skf = MultilabelStratifiedKFold(
+                        n_splits=self.config.N_fold,
+                        shuffle=True,
+                        random_state=self.config.random_state,
+                    )
+                    for n, (train_index, val_index) in enumerate(
+                        skf.split(dataset, dataset[self.labels])
+                    ):
+                        dataset.loc[val_index, "fold"] = int(n)
+                    dataset["fold"] = dataset["fold"].astype(int)
+                    print(dataset["fold"].value_counts())
                     create_dir(data_dir)
                     dataset.to_csv(osp.join(data_dir, "df_folds.csv"), index=False)
-                    
-                    self.train_set = dataset[dataset['fold'] != self.fold].reset_index(drop=True)
-                    self.val_set = dataset[dataset['fold'] == self.fold].reset_index(drop=True)
+
+                    self.train_set = dataset[dataset["fold"] != self.fold].reset_index(
+                        drop=True
+                    )
+                    self.val_set = dataset[dataset["fold"] == self.fold].reset_index(
+                        drop=True
+                    )
                 else:
                     dataset = pd.read_csv(osp.join(data_dir, "df_folds.csv"))
-                    print(dataset['fold'].value_counts())
-                    self.train_set = dataset[dataset['fold'] != self.fold].reset_index(drop=True)
-                    self.val_set = dataset[dataset['fold'] == self.fold].reset_index(drop=True)
+                    print(dataset["fold"].value_counts())
+                    self.train_set = dataset[dataset["fold"] != self.fold].reset_index(
+                        drop=True
+                    )
+                    self.val_set = dataset[dataset["fold"] == self.fold].reset_index(
+                        drop=True
+                    )
             else:
-                raise NotImplementedError(f"split_dataset {self.config.split_dataset} not supported")
+                raise NotImplementedError(
+                    f"split_dataset {self.config.split_dataset} not supported"
+                )
 
         else:
             self.dataset = pd.read_csv(
