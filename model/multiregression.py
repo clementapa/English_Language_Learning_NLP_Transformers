@@ -60,7 +60,9 @@ class MultiRegression(pl.LightningModule):
         if not self.config.layer_wise_lr_decay:
             out_dict = {}
 
-            model_parameters = filter(lambda parameter: parameter.requires_grad, self.model.parameters())
+            model_parameters = filter(
+                lambda parameter: parameter.requires_grad, self.model.parameters()
+            )
             out_dict["optimizer"] = optim.Adam(
                 model_parameters,
                 lr=self.lr,
