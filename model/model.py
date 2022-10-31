@@ -75,12 +75,12 @@ class Model(nn.Module):
                 self.linears.append(
                     nn.Linear(temp_num_features, temp_num_features // 2)
                 )
-                self._initialize_weights(self.linears[i])
+                self._init_weights(self.linears[i])
                 temp_num_features = temp_num_features // 2
             num_features = temp_num_features
 
         self.cls = nn.Linear(num_features, 6)
-        self._initialize_weights(self.cls)
+        self._init_weights(self.cls)
 
     def forward(self, inputs):
         outputs = self.features_extractor(**inputs, return_dict=True)
@@ -93,6 +93,15 @@ class Model(nn.Module):
         outputs = self.cls(features)
         return outputs
 
-    def _initialize_weights(self, m):
-        nn.init.orthogonal_(m.weight.data)
-        nn.init.constant_(m.bias.data, 0)
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            module.weight.data.normal_(mean=0.0, std=self.features_extractor.config.initializer_range)
+            if module.bias is not None:
+                module.bias.data.zero_()
+        elif isinstance(module, nn.Embedding):
+            module.weight.data.normal_(mean=0.0, std=self.features_extractor.config.initializer_range)
+            if module.padding_idx is not None:
+                module.weight.data[module.padding_idx].zero_()
+        elif isinstance(module, nn.LayerNorm):
+            module.bias.data.zero_()
+            module.weight.data.fill_(1.0)
