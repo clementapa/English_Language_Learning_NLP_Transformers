@@ -13,7 +13,7 @@ from pytorch_lightning.callbacks import (
     LearningRateMonitor,
     ModelCheckpoint,
     RichProgressBar,
-    StochasticWeightAveraging
+    StochasticWeightAveraging,
 )
 from pytorch_lightning.loggers import WandbLogger
 
@@ -97,7 +97,8 @@ if not config.test:
         config.pooling,
     ]
 
-    if config.add_tag_wandb != "": wandb_tags.append(config.add_tag_wandb)
+    if config.add_tag_wandb != "":
+        wandb_tags.append(config.add_tag_wandb)
 
     if config.layer_norm:
         wandb_tags.append("layer_norm")
