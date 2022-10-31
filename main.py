@@ -13,6 +13,7 @@ from pytorch_lightning.callbacks import (
     LearningRateMonitor,
     ModelCheckpoint,
     RichProgressBar,
+    StochasticWeightAveraging
 )
 from pytorch_lightning.loggers import WandbLogger
 
@@ -36,7 +37,6 @@ parser.add_argument("--max_length", default=None, type=int)
 parser.add_argument("--layer_norm", default=False, type=bool)
 parser.add_argument("--pooling", default="MeanPooling", type=str)
 parser.add_argument("--last_layer_reinitialization", default=False, type=bool)
-parser.add_argument("--gradient_checkpointing", default=False, type=bool)
 
 # optimization params
 parser.add_argument("--loss", default="SmoothL1Loss", type=str)
@@ -45,13 +45,16 @@ parser.add_argument("--batch_size", default=4, type=int)
 parser.add_argument("--scheduler", default=None, type=str)
 parser.add_argument("--T_max", default=1, type=int)
 parser.add_argument("--step_size_scheduler", default=1, type=int)
-parser.add_argument("--weight_decay", default=0.01, type=int)
+parser.add_argument("--weight_decay", default=0.01, type=float)
 parser.add_argument("--auto_scale_batch_size", default="power")
 parser.add_argument("--accumulate_grad_batches", default=None, type=int)
 parser.add_argument("--max_epochs", default=999, type=int)
 parser.add_argument("--layer_wise_lr_decay", default=False, type=bool)
 parser.add_argument("--LLDR", default=0.9, type=float)
 parser.add_argument("--adam_epsilon", default=1e-6, type=float)
+parser.add_argument("--gradient_checkpointing", default=False, type=bool)
+parser.add_argument("--stochastic_weight_averaging", default=False, type=bool)
+parser.add_argument("--swa_lrs", default=1e-2, type=float)
 
 # dataset params
 parser.add_argument("--num_workers", default=4, type=int)
@@ -70,6 +73,7 @@ parser.add_argument("--limit_train_batches", default=1.0, type=float)
 parser.add_argument("--val_check_interval", default=1.0, type=float)
 parser.add_argument("--kaggle", default=False, type=bool)
 parser.add_argument("--tune", default=False, type=bool)
+parser.add_argument("--add_tag_wandb", default="", type=str)
 
 # inference params
 parser.add_argument("--test", default=False)
@@ -92,6 +96,8 @@ if not config.test:
         config.loss,
         config.pooling,
     ]
+
+    if config.add_tag_wandb != "": wandb_tags.append(config.add_tag_wandb)
 
     if config.layer_norm:
         wandb_tags.append("layer_norm")
@@ -123,6 +129,9 @@ if not config.test:
             LearningRateMonitor(),
             MetricCallback(),
         ]
+
+        if config.stochastic_weight_averaging:
+            callbacks += [StochasticWeightAveraging(config.swa_lrs)]
 
         if not config.kaggle:
             callbacks += [RichProgressBar()]
@@ -193,6 +202,9 @@ if not config.test:
                 LearningRateMonitor(),
                 MetricCallback(),
             ]
+
+            if config.stochastic_weight_averaging:
+                callbacks += [StochasticWeightAveraging(config.swa_lrs)]
 
             if not config.kaggle:
                 callbacks += [RichProgressBar()]
