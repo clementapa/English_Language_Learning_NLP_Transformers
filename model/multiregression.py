@@ -126,21 +126,39 @@ class MultiRegression(pl.LightningModule):
         return out_dict
 
     def get_optimizer_encoder_decoder_params(self, model):
-        '''
-            https://www.kaggle.com/code/rhtsingh/guide-to-huggingface-schedulers-differential-lrs/notebook
-        '''
+        """
+        https://www.kaggle.com/code/rhtsingh/guide-to-huggingface-schedulers-differential-lrs/notebook
+        """
         # differential learning rate and weight decay
-        no_decay = ['bias', 'gamma', 'beta']
+        no_decay = ["bias", "gamma", "beta"]
         optimizer_parameters = [
-            {'params': [p for n, p in model.features_extractor.named_parameters() if not any(nd in n for nd in no_decay)],
-            'lr': self.config.encoder_lr,
-            'weight_decay_rate': 0.01},
-            {'params': [p for n, p in model.features_extractor.named_parameters() if any(nd in n for nd in no_decay)],
-            'lr': self.config.encoder_lr,
-            'weight_decay_rate': 0.0},
-            {'params': [p for n, p in model.named_parameters() if "features_extractor" not in n],
-            'lr': self.config.decoder_lr,
-            'weight_decay_rate':0.01}
+            {
+                "params": [
+                    p
+                    for n, p in model.features_extractor.named_parameters()
+                    if not any(nd in n for nd in no_decay)
+                ],
+                "lr": self.config.encoder_lr,
+                "weight_decay_rate": 0.01,
+            },
+            {
+                "params": [
+                    p
+                    for n, p in model.features_extractor.named_parameters()
+                    if any(nd in n for nd in no_decay)
+                ],
+                "lr": self.config.encoder_lr,
+                "weight_decay_rate": 0.0,
+            },
+            {
+                "params": [
+                    p
+                    for n, p in model.named_parameters()
+                    if "features_extractor" not in n
+                ],
+                "lr": self.config.decoder_lr,
+                "weight_decay_rate": 0.01,
+            },
         ]
         return optimizer_parameters
 
