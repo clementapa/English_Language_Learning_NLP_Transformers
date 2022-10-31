@@ -40,7 +40,8 @@ parser.add_argument("--last_layer_reinitialization", default=False, type=bool)
 
 # optimization params
 parser.add_argument("--loss", default="SmoothL1Loss", type=str)
-parser.add_argument("--lr", default=5e-5, type=float)
+parser.add_argument("--encoder_lr", default=5e-5, type=float)
+parser.add_argument("--decoder_lr", default=5e-5, type=float)
 parser.add_argument("--batch_size", default=4, type=int)
 parser.add_argument("--scheduler", default=None, type=str)
 parser.add_argument("--T_max", default=1, type=int)
@@ -195,7 +196,7 @@ if not config.test:
                     save_top_k=2,
                     mode="min",
                     verbose=True,
-                    filename="epoch={epoch}-step={step}-val_mcrmse{val/mcrmse:.2f}-fold{fold}",
+                    filename="epoch={epoch}-step={step}-val_mcrmse{val/mcrmse:.2f}-fold={fold}",
                     auto_insert_metric_name=False,
                     dirpath=osp.join(save_dir, "weights", f"Fold-{fold}"),
                 ),

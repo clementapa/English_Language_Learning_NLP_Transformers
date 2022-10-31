@@ -18,7 +18,7 @@ class MultiRegression(pl.LightningModule):
 
         self.config = config
 
-        self.lr = config.lr
+        self.lr = config.encoder_lr
         self.batch_size = config.batch_size
 
         if config.loss == "MCRMSELoss":
@@ -60,9 +60,8 @@ class MultiRegression(pl.LightningModule):
         if not self.config.layer_wise_lr_decay:
             out_dict = {}
 
-            model_parameters = filter(
-                lambda parameter: parameter.requires_grad, self.model.parameters()
-            )
+            model_parameters = self.get_optimizer_encoder_decoder_params(self.model)
+
             out_dict["optimizer"] = optim.AdamW(
                 model_parameters,
                 lr=self.lr,
@@ -103,7 +102,7 @@ class MultiRegression(pl.LightningModule):
                     )
         else:
             out_dict = {}
-            grouped_optimizer_params = self.get_optimizer_grouped_parameters(
+            grouped_optimizer_params = self.get_optimizer_llrd_grouped_parameters(
                 self.model, self.lr, self.config.weight_decay, self.config.LLDR
             )
             out_dict["optimizer"] = optim.AdamW(
@@ -126,7 +125,26 @@ class MultiRegression(pl.LightningModule):
 
         return out_dict
 
-    def get_optimizer_grouped_parameters(
+    def get_optimizer_encoder_decoder_params(self, model):
+        '''
+            https://www.kaggle.com/code/rhtsingh/guide-to-huggingface-schedulers-differential-lrs/notebook
+        '''
+        # differential learning rate and weight decay
+        no_decay = ['bias', 'gamma', 'beta']
+        optimizer_parameters = [
+            {'params': [p for n, p in model.features_extractor.named_parameters() if not any(nd in n for nd in no_decay)],
+            'lr': self.config.encoder_lr,
+            'weight_decay_rate': 0.01},
+            {'params': [p for n, p in model.features_extractor.named_parameters() if any(nd in n for nd in no_decay)],
+            'lr': self.config.encoder_lr,
+            'weight_decay_rate': 0.0},
+            {'params': [p for n, p in model.named_parameters() if "features_extractor" not in n],
+            'lr': self.config.decoder_lr,
+            'weight_decay_rate':0.01}
+        ]
+        return optimizer_parameters
+
+    def get_optimizer_llrd_grouped_parameters(
         self, model, learning_rate, weight_decay, layerwise_learning_rate_decay
     ):
         """
