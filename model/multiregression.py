@@ -85,6 +85,18 @@ class MultiRegression(pl.LightningModule):
                         ),
                         "monitor": "train/loss",
                     }
+                elif self.config.scheduler == "linear":
+                    out_dict["lr_scheduler"] = get_linear_schedule_with_warmup(
+                        out_dict["optimizer"],
+                        num_warmup_steps=0,
+                        num_training_steps=self.config.num_train_steps,
+                    )
+                elif self.config.scheduler == "cosine":
+                    out_dict["lr_scheduler"] = get_cosine_schedule_with_warmup(
+                        out_dict["optimizer"],
+                        num_warmup_steps=0,
+                        num_training_steps=self.config.num_train_steps,
+                    )
                 else:
                     raise NotImplementedError(
                         f"{self.config.scheduler} scheduler not supported"
