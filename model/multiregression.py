@@ -63,7 +63,7 @@ class MultiRegression(pl.LightningModule):
             model_parameters = filter(
                 lambda parameter: parameter.requires_grad, self.model.parameters()
             )
-            out_dict["optimizer"] = optim.Adam(
+            out_dict["optimizer"] = optim.AdamW(
                 model_parameters,
                 lr=self.lr,
                 weight_decay=self.config.weight_decay,
@@ -132,7 +132,7 @@ class MultiRegression(pl.LightningModule):
         """
         https://www.kaggle.com/code/rhtsingh/on-stability-of-few-sample-transformer-fine-tuning?scriptVersionId=67176591&cellId=26
         """
-        no_decay = ["bias", "LayerNorm.weight"]
+        no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
         # initialize lr for task specific layer
         optimizer_grouped_parameters = [
             {
