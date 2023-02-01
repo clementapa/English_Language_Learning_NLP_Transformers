@@ -89,7 +89,6 @@ if config.kaggle:
 config.save_pretrained = osp.join(config.save_pretrained, config.name_model)
 
 if not config.test:
-
     wandb_tags = [
         config.name_model,
         "freezed_backbone" if config.freeze_backbone else "no_freezed_backbone",
@@ -166,7 +165,6 @@ if not config.test:
         trainer.fit(model, datamodule=dataset_module)
 
     elif config.split_dataset == "MultilabelStratifiedKFold":
-
         for fold in range(config.N_fold):
             print(f"\n-----------FOLD {fold} ------------")
 

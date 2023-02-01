@@ -12,7 +12,6 @@ def create_dir(dir_name):
 
 
 def collate_batch(batch):
-
     inputs = {
         "input_ids": [],
         "token_type_ids": [],
