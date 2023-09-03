@@ -7,6 +7,7 @@ Evaluating language knowledge of ELL students from grades 8-12
 ![Python](https://img.shields.io/badge/Python-green.svg?style=plastic)
 ![PyTorch](https://img.shields.io/badge/PyTorch-orange.svg?style=plastic)
 ![PyTorch Lightning](https://img.shields.io/badge/PyTorch-Lightning-blueviolet.svg?style=plastic)
+![Transformers](https://img.shields.io/badge/%F0%9F%A4%97-Transformers-yellow?style=plastic&logo=Transformers&logoColor=white)
 
 ## :mag_right: Introduction
 This code was build for this kaggle competition: https://www.kaggle.com/competitions/feedback-prize-english-language-learning/overview
