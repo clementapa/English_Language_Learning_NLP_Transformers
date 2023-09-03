@@ -16,7 +16,7 @@ This code was build for this kaggle competition: https://www.kaggle.com/competit
 
 :dart: ***Goal of this project for me*** \
 For me, the goal of this project was: 
-- to train myself to respond to an NLP task (here it is a NLP regression task) 
+- to train myself to respond to an NLP task (here it is a NLP multi-regression task) 
 - to handle transformers fine tuning by implementing and applying optimization training techniques using limited computational resources. 
 - to see all the methods used to facilitate and optimize transformers fine tuning. Such as :
   - Freezing
